@@ -1,0 +1,45 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+share/python-wheels/
+*.whl
+
+# Virtual environments and env files
+venv/
+*/venv
+.env
+.env.*
+.env.local
+.env.development
+
+# Node / frontend
+node_modules/
+*/node_modules
+
+# IDEs and editors
+.vscode/
+.idea/
+*.iml
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploads / generated content
+uploads/
+*/uploads
