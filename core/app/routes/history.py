@@ -41,3 +41,21 @@ async def get_job_by_id(
         raise HTTPException(status_code=404, detail="Job not found")
 
     return AnalysisJob.from_orm(job)
+
+@router.delete("/")
+async def delete_all_history(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    """Delete all analysis history for the current user"""
+    # Get all jobs for the user
+    jobs = db.query(models.AnalysisJob).filter(
+        models.AnalysisJob.user_id == current_user.id
+    ).all()
+    
+    # Delete all jobs (cascade will delete related records)
+    for job in jobs:
+        db.delete(job)
+    
+    db.commit()
+    return {"message": "All history deleted successfully"}

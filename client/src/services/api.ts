@@ -121,6 +121,11 @@ export const historyAPI = {
     const response = await api.get(`/history/${id}`);
     return response.data;
   },
+
+  deleteAll: async (): Promise<{ message: string }> => {
+    const response = await api.delete('/history/');
+    return response.data;
+  },
 };
 
 export const analyticsAPI = {

@@ -28,8 +28,8 @@ class AnalysisJob(Base):
 
     # Relationships
     user = relationship("User", back_populates="analysis_jobs")
-    comments = relationship("Comment", back_populates="job")
-    sentiment_results = relationship("SentimentResult", back_populates="job")
+    comments = relationship("Comment", back_populates="job", cascade="all, delete-orphan")
+    sentiment_results = relationship("SentimentResult", back_populates="job", cascade="all, delete-orphan")
 
 class Comment(Base):
     __tablename__ = "comments"
@@ -42,7 +42,7 @@ class Comment(Base):
 
     # Relationships
     job = relationship("AnalysisJob", back_populates="comments")
-    sentiment_result = relationship("SentimentResult", back_populates="comment", uselist=False)
+    sentiment_result = relationship("SentimentResult", back_populates="comment", uselist=False, cascade="all, delete-orphan")
 
 class SentimentResult(Base):
     __tablename__ = "sentiment_results"
@@ -74,4 +74,4 @@ class UploadedFile(Base):
     job = relationship("AnalysisJob", back_populates="uploaded_file")
 
 # Add back reference to AnalysisJob
-AnalysisJob.uploaded_file = relationship("UploadedFile", back_populates="job", uselist=False)
+AnalysisJob.uploaded_file = relationship("UploadedFile", back_populates="job", uselist=False, cascade="all, delete-orphan")
