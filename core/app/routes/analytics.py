@@ -24,6 +24,11 @@ async def get_analytics_summary(
     ).all()
 
     total_analyses = len(jobs)
+    
+    # Count analyses by type
+    text_analyses = sum(1 for job in jobs if job.type == 'text')
+    file_analyses = sum(1 for job in jobs if job.type == 'file')
+    link_analyses = sum(1 for job in jobs if job.type == 'link')
 
     # Get all sentiment results
     results = db.query(models.SentimentResult).join(models.AnalysisJob).filter(
@@ -116,6 +121,9 @@ async def get_analytics_summary(
 
     return AnalyticsSummary(
         total_analyses=total_analyses,
+        text_analyses=text_analyses,
+        file_analyses=file_analyses,
+        link_analyses=link_analyses,
         sentiment_distribution=sentiment_distribution,
         trend_data=trend_data,
         top_keywords=top_keywords,

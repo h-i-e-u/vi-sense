@@ -193,7 +193,10 @@ async def analyze_file(
             # Assume first column contains text
             texts = df.iloc[:, 0].astype(str).tolist()
         elif file.filename.endswith(('.xlsx', '.xls')):
-            df = pd.read_excel(file_path)
+            try:
+                df = pd.read_excel(file_path)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Failed to read Excel file: {str(e)}")
             texts = df.iloc[:, 0].astype(str).tolist()
         elif file.filename.endswith('.txt'):
             with open(file_path, 'r', encoding='utf-8') as f:

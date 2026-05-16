@@ -39,6 +39,9 @@ export interface Comment {
 
 export interface AnalyticsSummary {
   total_analyses: number;
+  text_analyses: number;
+  file_analyses: number;
+  link_analyses: number;
   sentiment_distribution: {
     positive: number;
     neutral: number;

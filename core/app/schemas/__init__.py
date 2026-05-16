@@ -95,6 +95,9 @@ class TopKeyword(BaseModel):
 
 class AnalyticsSummary(BaseModel):
     total_analyses: int
+    text_analyses: int
+    file_analyses: int
+    link_analyses: int
     sentiment_distribution: SentimentDistribution
     trend_data: List[TrendData]
     top_keywords: List[TopKeyword]

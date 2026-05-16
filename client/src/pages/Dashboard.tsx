@@ -42,19 +42,19 @@ const Dashboard: React.FC = () => {
     },
     {
       title: 'Text Analyses',
-      value: Math.floor((analytics?.total_analyses || 0) * 0.4), // Mock data
+      value: analytics?.text_analyses || 0,
       icon: MessageSquare,
       color: 'text-green-400'
     },
     {
       title: 'File Analyses',
-      value: Math.floor((analytics?.total_analyses || 0) * 0.3), // Mock data
+      value: analytics?.file_analyses || 0,
       icon: FileText,
       color: 'text-purple-400'
     },
     {
       title: 'Link Analyses',
-      value: Math.floor((analytics?.total_analyses || 0) * 0.3), // Mock data
+      value: analytics?.link_analyses || 0,
       icon: TrendingUp,
       color: 'text-orange-400'
     }
