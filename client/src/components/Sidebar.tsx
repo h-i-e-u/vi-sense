@@ -61,7 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   };
 
   return (
-    <div className={cn("w-64 glass rounded-xl p-6 flex flex-col h-[calc(100vh-3rem)]", className)}>
+    <div className={cn("w-64 glass rounded-xl p-6 flex flex-col h-[calc(100vh-1rem)]", className)}>
       <div>
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-2">Vi-Sense</h2>
@@ -102,12 +102,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           <LogOut className="h-5 w-5" />
           <span className="font-medium">Sign Out</span>
         </button>
-        
-        <div className="text-white/60 text-sm">
+      </div>
+      <div className="text-white/60 text-sm mt-4 text-center">
           <p>© 2026 Vi-Sense</p>
           <p>Vietnamese Sentiment Analysis</p>
           <p>D.C Hieu</p>
-        </div>
       </div>
     </div>
   );

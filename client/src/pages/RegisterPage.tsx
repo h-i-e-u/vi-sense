@@ -168,14 +168,18 @@ const RegisterPage: React.FC = () => {
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="text-purple-400 hover:text-purple-300 font-medium"
+                className="relative inline-block font-medium text-purple-400 transition-colors duration-200 hover:text-purple-300 pb-0.5 after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-right after:scale-x-0 after:bg-purple-400 after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
               >
                 Sign in
               </Link>
             </p>
           </div>
-          <div className="mt-3 text-center">
-            <Link to="/" className="text-white/60 hover:text-white/90">
+
+          <div className="mt-4 text-center">
+            <Link
+              to="/"
+              className="relative font-medium text-white/50 transition-colors duration-200 hover:text-white after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
+            >
               Home
             </Link>
           </div>
