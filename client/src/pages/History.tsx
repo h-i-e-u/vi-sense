@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { History as HistoryIcon, Calendar, Trash2 } from 'lucide-react';
+import { History as HistoryIcon, Calendar, Trash2, ChevronRight, RefreshCw } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { GlassCard } from '../components/GlassCard';
 import { SentimentBadge } from '../components/SentimentBadge';
-import { historyAPI } from '../services/api';
+import { historyAPI, analysisAPI } from '../services/api';
 import { AnalysisJob } from '../types';
 
 const History: React.FC = () => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<AnalysisJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [refreshing, setRefreshing] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -41,12 +44,28 @@ const History: React.FC = () => {
       setJobs([]);
       setShowDeleteConfirm(false);
       setDeleteConfirmInput('');
+      console.log(jobs)
       alert('All history has been deleted successfully');
     } catch (error) {
       console.error('Failed to delete history:', error);
       alert('Failed to delete history. Please try again.');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleRefresh = async (jobId: string) => {
+    setRefreshing(jobId);
+    try {
+      const refreshedJob = await analysisAPI.refreshAnalysis(jobId);
+      // Update the jobs list with the new refreshed job
+      setJobs([refreshedJob, ...jobs.filter(j => j.id !== jobId)]);
+      alert('Analysis refreshed successfully!');
+    } catch (error) {
+      console.error('Failed to refresh analysis:', error);
+      alert('Failed to refresh analysis. Please try again.');
+    } finally {
+      setRefreshing(null);
     }
   };
 
@@ -134,8 +153,8 @@ const History: React.FC = () => {
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
                     <GlassCard className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start space-x-4 flex-1">
                           <div className="text-2xl">{getJobTypeIcon(job.type)}</div>
                           <div className="flex-1">
                             <h3 className="text-lg font-semibold text-white mb-1">
@@ -178,12 +197,34 @@ const History: React.FC = () => {
                           </div>
                         </div>
 
+                        {/* Action Buttons */}
+                        <div className="flex flex-col gap-2">
+                          <button
+                            onClick={() => navigate(`/analytics/${job.id}`)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors text-sm whitespace-nowrap"
+                          >
+                            Detail
+                            <ChevronRight className="h-4 w-4" />
+                          </button>
+                          
+                          {(job.type === 'link' || job.type === 'file') && job.status === 'completed' && (
+                            <button
+                              onClick={() => handleRefresh(job.id)}
+                              disabled={refreshing === job.id}
+                              className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-colors text-sm whitespace-nowrap disabled:opacity-50"
+                            >
+                              <RefreshCw className={`h-4 w-4 ${refreshing === job.id ? 'animate-spin' : ''}`} />
+                              Refresh
+                            </button>
+                          )}
+                        </div>
+
                         {job.results && job.results.length > 0 && (
                           <div className="flex flex-col items-end space-y-2">
-                            <SentimentBadge
+                            {/* <SentimentBadge
                               sentiment={job.results[0].label}
                               confidence={job.results[0].confidence}
-                            />
+                            /> */}
                             {job.results.length > 1 && (
                               <span className="text-white/60 text-xs">
                                 +{job.results.length - 1} more

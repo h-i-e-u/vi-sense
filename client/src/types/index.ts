@@ -6,7 +6,7 @@ export interface User {
 }
 
 export interface SentimentResult {
-  label: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+  label: "POSITIVE" | "NEGATIVE" | "NEUTRAL";
   confidence: number;
   text: string;
 }
@@ -14,8 +14,8 @@ export interface SentimentResult {
 export interface AnalysisJob {
   id: string;
   user_id: string;
-  type: 'text' | 'link' | 'file';
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  type: "text" | "link" | "file";
+  status: "pending" | "processing" | "completed" | "failed";
   created_at: string;
   completed_at?: string;
   results?: SentimentResult[];
@@ -25,6 +25,8 @@ export interface AnalysisJob {
     neutral_ratio?: number;
     negative_ratio?: number;
     keywords?: string[];
+    source_url?: string;
+    platform?: string;
   };
 }
 
@@ -84,7 +86,7 @@ export interface AnalyzeTextRequest {
 
 export interface AnalyzeLinkRequest {
   url: string;
-  type: 'youtube' | 'shopee' | 'tiki';
+  type: "youtube" | "shopee" | "tiki";
 }
 
 export interface AnalyzeFileRequest {

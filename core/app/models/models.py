@@ -38,6 +38,7 @@ class Comment(Base):
     job_id = Column(String, ForeignKey("analysis_jobs.id"), nullable=False)
     text = Column(Text, nullable=False)
     source_url = Column(String, nullable=True)
+    source_date = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

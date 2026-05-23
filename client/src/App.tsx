@@ -9,6 +9,7 @@ import AnalyzeText from './pages/AnalyzeText'
 import AnalyzeFile from './pages/AnalyzeFile'
 import History from './pages/History'
 import Analytics from './pages/Analytics'
+import DetailAnalytics from './pages/DetailAnalytics'
 // import './App.css'
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/analyze/file" element={<AnalyzeFile />} />
           <Route path="/history" element={<History />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/analytics/:jobId" element={<DetailAnalytics />} />
         </Routes>
         <Toaster position="top-right" />
       </div>

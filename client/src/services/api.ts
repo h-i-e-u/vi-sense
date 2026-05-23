@@ -109,6 +109,16 @@ export const analysisAPI = {
     });
     return response.data;
   },
+
+  checkExistingAnalysis: async (jobId: string): Promise<any> => {
+    const response = await api.get(`/analyze/check-existing/${jobId}`);
+    return response.data;
+  },
+
+  refreshAnalysis: async (jobId: string): Promise<AnalysisJob> => {
+    const response = await api.post(`/analyze/refresh/${jobId}`);
+    return response.data;
+  },
 };
 
 export const historyAPI = {
@@ -131,6 +141,11 @@ export const historyAPI = {
 export const analyticsAPI = {
   getSummary: async (): Promise<AnalyticsSummary> => {
     const response = await api.get('/analytics/summary');
+    return response.data;
+  },
+
+  getJobAnalytics: async (jobId: string): Promise<AnalyticsSummary> => {
+    const response = await api.get(`/analytics/job/${jobId}`);
     return response.data;
   },
 };

@@ -72,6 +72,7 @@ class Comment(BaseModel):
     text: str
     sentiment: SentimentResult
     source_url: Optional[str]
+    source_date: Optional[datetime] = None
     created_at: datetime
 
     class Config:
