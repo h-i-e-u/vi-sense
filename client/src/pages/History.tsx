@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { History as HistoryIcon, Calendar, FileText, Trash2 } from 'lucide-react';
+import { History as HistoryIcon, Calendar, Trash2 } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { GlassCard } from '../components/GlassCard';
 import { SentimentBadge } from '../components/SentimentBadge';
