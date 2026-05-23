@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import { AnimatedButton } from '../components/AnimatedButton';
-import { GlassCard } from '../components/GlassCard';
-import { authAPI, getErrorMessage } from '../services/api';
-import toast from 'react-hot-toast';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { AnimatedButton } from "../components/AnimatedButton";
+import { GlassCard } from "../components/GlassCard";
+import { authAPI, getErrorMessage } from "../services/api";
+import toast from "react-hot-toast";
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    username: '',
-    password: '',
-    confirmPassword: ''
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +22,7 @@ const RegisterPage: React.FC = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -32,11 +32,11 @@ const RegisterPage: React.FC = () => {
       const response = await authAPI.register({
         email: formData.email,
         username: formData.username,
-        password: formData.password
+        password: formData.password,
       });
-      localStorage.setItem('access_token', response.access_token);
-      toast.success('Registration successful!');
-      navigate('/dashboard');
+      localStorage.setItem("access_token", response.access_token);
+      toast.success("Registration successful!");
+      navigate("/dashboard");
     } catch (error: any) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -45,9 +45,9 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -61,8 +61,12 @@ const RegisterPage: React.FC = () => {
       >
         <GlassCard className="p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
-            <p className="text-white/60">Join Vi-Sense for sentiment analysis</p>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Create Account
+            </h1>
+            <p className="text-white/60">
+              Join Vi-Sense for sentiment analysis
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -109,7 +113,7 @@ const RegisterPage: React.FC = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/40" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
@@ -122,7 +126,11 @@ const RegisterPage: React.FC = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/60"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -134,7 +142,7 @@ const RegisterPage: React.FC = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/40" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -151,17 +159,25 @@ const RegisterPage: React.FC = () => {
               size="lg"
               isLoading={isLoading}
             >
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {isLoading ? "Creating Account..." : "Create Account"}
             </AnimatedButton>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-white/60">
-              Already have an account?{' '}
-              <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-purple-400 hover:text-purple-300 font-medium"
+              >
                 Sign in
               </Link>
             </p>
+          </div>
+          <div className="mt-3 text-center">
+            <Link to="/" className="text-white/60 hover:text-white/90">
+              Home
+            </Link>
           </div>
         </GlassCard>
       </motion.div>

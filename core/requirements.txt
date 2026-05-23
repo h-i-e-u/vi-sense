@@ -15,3 +15,4 @@ playwright
 python-dotenv
 pydantic
 pydantic-settings
+google-api-python-client

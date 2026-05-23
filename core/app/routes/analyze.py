@@ -7,6 +7,7 @@ from ..schemas import (
 )
 from ..utils.sentiment import sentiment_analyzer
 from ..routes.auth import get_current_user
+from core.crawlers.youtube_crawler import YouTubeCrawler
 import uuid
 import os
 import pandas as pd
@@ -115,20 +116,25 @@ async def analyze_link(
     """Analyze sentiment from a URL (YouTube, Shopee, Tiki)"""
     job = create_analysis_job(db, current_user.id, "link")
 
-    # TODO: Implement crawler for different platforms
-    # For now, return mock data
     try:
-        # Mock comments for demonstration
-        mock_comments = [
-            "Sản phẩm rất tốt, chất lượng tuyệt vời!",
-            "Giao hàng nhanh, đóng gói cẩn thận",
-            "Giá cả hợp lý, sẽ mua lại",
-            "Không hài lòng với chất lượng",
-            "Sản phẩm bị hỏng khi nhận"
-        ]
+        if request.type == 'youtube':
+            crawler = YouTubeCrawler()
+            comments = crawler.get_comments(request.url, max_comments=50)
+            if not comments:
+                raise HTTPException(status_code=404, detail="No comments found for the provided YouTube video")
+            texts = [comment['text'] for comment in comments]
+        else:
+            # Fallback for other platforms until implemented
+            texts = [
+                "Sản phẩm rất tốt, chất lượng tuyệt vời!",
+                "Giao hàng nhanh, đóng gói cẩn thận",
+                "Giá cả hợp lý, sẽ mua lại",
+                "Không hài lòng với chất lượng",
+                "Sản phẩm bị hỏng khi nhận"
+            ]
 
-        results = sentiment_analyzer.analyze_batch(mock_comments)
-        save_sentiment_results(db, job.id, results, mock_comments)
+        results = sentiment_analyzer.analyze_batch(texts)
+        save_sentiment_results(db, job.id, results, texts)
 
         # Calculate ratios
         positive_count = sum(1 for r in results if r['label'] == 'POSITIVE')

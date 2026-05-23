@@ -115,6 +115,11 @@ const LoginPage: React.FC = () => {
               </Link>
             </p>
           </div>
+          <div className="mt-3 text-center">
+            <Link to="/" className="text-white/60 hover:text-white/90">
+            Home
+            </Link>
+          </div>
         </GlassCard>
       </motion.div>
     </div>
