@@ -207,7 +207,7 @@ const History: React.FC = () => {
                             <ChevronRight className="h-4 w-4" />
                           </button>
                           
-                          {(job.type === 'link' || job.type === 'file') && job.status === 'completed' && (
+                          {(job.type === 'link') && job.status === 'completed' && (
                             <button
                               onClick={() => handleRefresh(job.id)}
                               disabled={refreshing === job.id}
