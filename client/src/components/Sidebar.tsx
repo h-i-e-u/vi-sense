@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   BarChart3,
   FileText,
@@ -8,10 +8,10 @@ import {
   Link as LinkIcon,
   MessageSquare,
   TrendingUp,
-  LogOut
-} from 'lucide-react';
-import { cn } from '../utils/cn';
-import toast from 'react-hot-toast';
+  LogOut,
+} from "lucide-react";
+import { cn } from "../utils/cn";
+import toast from "react-hot-toast";
 
 interface SidebarProps {
   className?: string;
@@ -19,33 +19,33 @@ interface SidebarProps {
 
 const menuItems = [
   {
-    path: '/dashboard',
-    label: 'Dashboard',
+    path: "/dashboard",
+    label: "Dashboard",
     icon: BarChart3,
   },
   {
-    path: '/analyze/link',
-    label: 'Analyze Link',
-    icon: LinkIcon,
-  },
-  {
-    path: '/analyze/text',
-    label: 'Analyze Text',
+    path: "/analyze/text",
+    label: "Analyze Text",
     icon: MessageSquare,
   },
   {
-    path: '/analyze/file',
-    label: 'Analyze File',
+    path: "/analyze/link",
+    label: "Analyze Link",
+    icon: LinkIcon,
+  },
+  {
+    path: "/analyze/file",
+    label: "Analyze File",
     icon: FileText,
   },
   {
-    path: '/history',
-    label: 'History',
+    path: "/history",
+    label: "History",
     icon: History,
   },
   {
-    path: '/analytics',
-    label: 'Analytics',
+    path: "/analytics",
+    label: "Analytics",
     icon: TrendingUp,
   },
 ];
@@ -55,13 +55,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    localStorage.removeItem('access_token');
-    toast.success('Signed out successfully');
-    navigate('/login');
+    localStorage.removeItem("access_token");
+    toast.success("Signed out successfully");
+    navigate("/login");
   };
 
   return (
-    <div className={cn("w-64 glass rounded-xl p-6 flex flex-col h-[calc(100vh-1rem)]", className)}>
+    <div
+      className={cn(
+        "w-64 glass rounded-xl p-6 flex flex-col h-[calc(100vh-1rem)]",
+        className,
+      )}
+    >
       <div>
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-2">Vi-Sense</h2>
@@ -80,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                     "flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300",
                     isActive
                       ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                      : "text-white/70 hover:text-white hover:bg-white/10"
+                      : "text-white/70 hover:text-white hover:bg-white/10",
                   )}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -104,9 +109,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         </button>
       </div>
       <div className="text-white/60 text-sm mt-4 text-center">
-          <p>© 2026 Vi-Sense</p>
-          <p>Vietnamese Sentiment Analysis</p>
-          <p>D.C Hieu</p>
+        <p>© 2026 Vi-Sense</p>
+        <p>Vietnamese Sentiment Analysis</p>
+        <p>D.C Hieu</p>
       </div>
     </div>
   );
