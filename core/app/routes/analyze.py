@@ -345,7 +345,7 @@ async def refresh_analysis(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(database.get_db)
 ):
-    """Refresh sentiment analysis for an existing link or file job"""
+    """Refresh sentiment analysis for an existing link"""
     original_job = db.query(models.AnalysisJob).filter(
         models.AnalysisJob.id == job_id,
         models.AnalysisJob.user_id == current_user.id
@@ -354,8 +354,8 @@ async def refresh_analysis(
     if not original_job:
         raise HTTPException(status_code=404, detail="Job not found")
     
-    if original_job.type == 'text':
-        raise HTTPException(status_code=400, detail="Cannot refresh text analysis")
+    if original_job.type == 'text' or original_job.type == 'file':
+        raise HTTPException(status_code=400, detail="Cannot refresh text/file analysis")
     
     new_job = create_analysis_job(db, current_user.id, original_job.type)
     

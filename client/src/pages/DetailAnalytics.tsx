@@ -191,7 +191,7 @@ const DetailAnalytics: React.FC = () => {
                   </p>
                 </div>
 
-                {(job.type === "link" || job.type === "file") &&
+                {(job.type === "link") &&
                   job.status === "completed" && (
                     <button
                       onClick={handleRefresh}
