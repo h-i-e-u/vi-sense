@@ -63,6 +63,28 @@ export interface AnalyticsSummary {
   top_negative_comments: Comment[];
 }
 
+export interface DailyAnalysisCount {
+  date: string;
+  count: number;
+}
+
+export interface UserAnalyticsSummary {
+  total_analyses: number;
+  text_analyses: number;
+  file_analyses: number;
+  link_analyses: number;
+  sentiment_distribution: {
+    positive: number;
+    neutral: number;
+    negative: number;
+  };
+  daily_analysis_counts: DailyAnalysisCount[];
+  top_keywords: Array<{
+    word: string;
+    count: number;
+  }>;
+}
+
 export interface AuthResponse {
   access_token: string;
   token_type: string;

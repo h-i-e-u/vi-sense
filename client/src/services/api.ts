@@ -7,7 +7,8 @@ import {
   AnalyzeLinkRequest,
   AnalyzeFileRequest,
   AnalysisJob,
-  AnalyticsSummary
+  AnalyticsSummary,
+  UserAnalyticsSummary
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -139,7 +140,7 @@ export const historyAPI = {
 };
 
 export const analyticsAPI = {
-  getSummary: async (): Promise<AnalyticsSummary> => {
+  getSummary: async (): Promise<UserAnalyticsSummary> => {
     const response = await api.get('/analytics/summary');
     return response.data;
   },

@@ -104,3 +104,16 @@ class AnalyticsSummary(BaseModel):
     top_keywords: List[TopKeyword]
     top_positive_comments: List[Comment]
     top_negative_comments: List[Comment]
+
+class DailyAnalysisCount(BaseModel):
+    date: str
+    count: int
+
+class UserAnalyticsSummary(BaseModel):
+    total_analyses: int
+    text_analyses: int
+    file_analyses: int
+    link_analyses: int
+    sentiment_distribution: SentimentDistribution
+    daily_analysis_counts: List[DailyAnalysisCount]
+    top_keywords: List[TopKeyword]
