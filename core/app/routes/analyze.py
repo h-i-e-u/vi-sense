@@ -90,7 +90,7 @@ def parse_source_dates_from_dataframe(df: pd.DataFrame) -> List[Optional[datetim
         return [None] * len(df)
 
     date_column = date_columns[0]
-    parsed = pd.to_datetime(df[date_column], errors="coerce", infer_datetime_format=True)
+    parsed = pd.to_datetime(df[date_column], errors="coerce")
     return [dt.to_pydatetime() if not pd.isna(dt) else None for dt in parsed]
 
 
@@ -263,7 +263,7 @@ async def analyze_file(
                     parts = re.split(r'[\t,;|]', line, maxsplit=1)
                     if len(parts) == 2:
                         maybe_date, maybe_text = parts
-                        parsed_date = pd.to_datetime(maybe_date, errors='coerce', infer_datetime_format=True)
+                        parsed_date = pd.to_datetime(maybe_date, errors='coerce')
                         if not pd.isna(parsed_date):
                             texts.append(maybe_text.strip())
                             comment_dates.append(parsed_date.to_pydatetime())
