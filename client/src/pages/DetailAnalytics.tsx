@@ -98,6 +98,17 @@ const DetailAnalytics: React.FC = () => {
     }
   };
 
+  const formatDateLabel = (date: string) => {
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return date;
+    return d.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+    });
+  };
+
+ 
+
   if (loading) {
     return (
       <div className="min-h-screen p-6">
@@ -335,7 +346,15 @@ const DetailAnalytics: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart data={analytics.trend_data}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis dataKey="date" stroke="#9CA3AF" fontSize={12} />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#9CA3AF"
+                          fontSize={12}
+                          tickFormatter={formatDateLabel}
+                          interval={0}
+                          angle={-35}
+                          textAnchor="end"
+                        />
                         <YAxis stroke="#9CA3AF" fontSize={12} />
                         <Tooltip
                           contentStyle={{
