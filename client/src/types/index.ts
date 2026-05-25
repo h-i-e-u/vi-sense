@@ -28,6 +28,7 @@ export interface AnalysisJob {
     source_url?: string;
     platform?: string;
   };
+  from_cache?: boolean;// flag from cahe
 }
 
 export interface Comment {

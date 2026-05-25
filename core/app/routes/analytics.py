@@ -182,7 +182,6 @@ async def get_job_analytics(
                 confidence=result.confidence,
                 text=result.text
             ),
-            source_url=source_comment.source_url if source_comment else None,
             source_date=source_comment.source_date if source_comment else None,
             created_at=(source_comment.source_date if source_comment and getattr(source_comment, 'source_date', None)
                     else (source_comment.created_at if source_comment and getattr(source_comment, 'created_at', None)
@@ -201,7 +200,6 @@ async def get_job_analytics(
                 confidence=result.confidence,
                 text=result.text
             ),
-            source_url=source_comment.source_url if source_comment else None,
             source_date=source_comment.source_date if source_comment else None,
             created_at=(source_comment.source_date if source_comment and getattr(source_comment, 'source_date', None)
                     else (source_comment.created_at if source_comment and getattr(source_comment, 'created_at', None)

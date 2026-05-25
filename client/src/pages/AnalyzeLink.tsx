@@ -18,7 +18,7 @@ const AnalyzeLink: React.FC = () => {
   );
   const [result, setResult] = useState<AnalysisJob | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [existingJob, setExistingJob] = useState<AnalysisJob | null>(null);
+  const [isCache, setIsCache] = useState(false);
   const navigate = useNavigate();
 
   const platformExamples = {
@@ -37,7 +37,14 @@ const AnalyzeLink: React.FC = () => {
     try {
       const response = await analysisAPI.analyzeLink({ url, type: platform });
       setResult(response);
-      toast.success("Analysis completed!");
+
+      if (response.from_cache) {
+        toast.success("Loaded analysis successfully!")
+        setIsCache(response.from_cache)
+      } else {
+        toast.success("New analysis completed!");
+        setIsCache(false)
+      }
     } catch (error: any) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -58,27 +65,7 @@ const AnalyzeLink: React.FC = () => {
     }
   };
 
-  const checkExistingLink = async () => {
-    if (!url.trim()) {
-      setExistingJob(null);
-      return;
-    }
-    try {
-      const history = await historyAPI.getHistory();
-      const found = history.find(
-        (job) =>
-          job.type === "link" &&
-          job.metadata?.source_url === url &&
-          job.status === "completed",
-      );
-      setExistingJob(found || null);
-    } catch (error) {
-      console.error("Không thể kiểm tra history", error);
-    }
-  };
-  useEffect(() => {
-    checkExistingLink();
-  }, [url]);
+
 
   return (
     <div className="min-h-screen p-6">
@@ -152,17 +139,16 @@ const AnalyzeLink: React.FC = () => {
                   Example: {platformExamples[platform]}
                 </p>
               </div>
-              {existingJob && (
+              {isCache && result && (
                 <div className="mb-4 rounded-xl bg-yellow-500/10 border border-yellow-400/30 p-4 text-yellow-100">
                   Link này đã được phân tích trước đó.
                   <div className="mt-3 flex flex-wrap gap-2">
                     <AnimatedButton
-                      onClick={() => navigate(`/analytics/${existingJob.id}`)}
+                      onClick={() => navigate(`/analytics/${result.id}`)}
                       className="px-4 py-2 bg-blue-500 text-white rounded-lg"
                     >
                       Detail
                       <ChevronRight className="h-4 w-4" />
-
                     </AnimatedButton>
                   </div>
                 </div>
@@ -188,15 +174,15 @@ const AnalyzeLink: React.FC = () => {
               >
                 <GlassCard className="p-6">
                   <div className="mt-6 mb-10 flex flex-auto gap-3 items-center justify-between">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    Analysis Results
-                  </h3>
+                    <h3 className="text-xl font-semibold text-white mb-4">
+                      Analysis Results
+                    </h3>
                     <AnimatedButton
                       onClick={() => navigate(`/analytics/${result.id}`)}
                       className=""
-                      >
+                    >
                       Detail
-                        <ChevronRight className="h-4 w-4" />
+                      <ChevronRight className="h-4 w-4" />
                     </AnimatedButton>
                   </div>
                   {/* Summary Stats */}

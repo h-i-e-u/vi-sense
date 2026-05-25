@@ -51,6 +51,7 @@ class AnalysisJob(AnalysisJobBase):
     results: Optional[List[SentimentResult]] = Field(validation_alias="sentiment_results")
     metadata: Optional[Dict[str, Any]] = Field(validation_alias="job_metadata")
     source_url: Optional[str] = None
+    from_cache: bool = False
 
     class Config:
         from_attributes = True

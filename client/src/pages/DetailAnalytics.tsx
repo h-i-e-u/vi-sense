@@ -40,6 +40,8 @@ const DetailAnalytics: React.FC = () => {
         ]);
         setJob(jobData);
         setAnalytics(analyticsData);
+        console.log(jobData)
+        console.log(analyticsData)
       } catch (err) {
         console.error("Failed to fetch analytics:", err);
         setError("Failed to load analytics. Please try again.");

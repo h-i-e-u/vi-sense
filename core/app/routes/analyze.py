@@ -158,7 +158,10 @@ async def analyze_link(
 
     if existing_job:
         response.status_code = status.HTTP_200_OK
-        return AnalysisJob.from_orm(existing_job)
+        # Thên from cache flag
+        job_schema = AnalysisJob.from_orm(existing_job)
+        job_schema.from_cache = True 
+        return job_schema
 
     # Create NEW job
     job = create_analysis_job(db, current_user.id, "link", source_url=request.url)
@@ -371,17 +374,18 @@ async def refresh_analysis(
     if original_job.type == 'text' or original_job.type == 'file':
         raise HTTPException(status_code=400, detail="Cannot refresh text/file analysis")
     
-    new_job = create_analysis_job(db, current_user.id, original_job.type)
+    # take URL
+    source_url = original_job.source_url
+    metadata = original_job.job_metadata or {}
+    platform = metadata.get('platform', 'youtube')
+
+    if not source_url:
+        raise HTTPException(status_code=400, detail="Original URL not found in job record")
+
+    new_job = create_analysis_job(db, current_user.id, original_job.type, source_url=source_url)
     
     try:
-        if original_job.type == 'link':
-            metadata = original_job.job_metadata or {}
-            source_url = metadata.get('source_url')
-            platform = metadata.get('platform', 'youtube')
-            
-            if not source_url:
-                raise HTTPException(status_code=400, detail="Original URL not found in job metadata")
-            
+        if original_job.type == 'link': 
             texts = []
             comment_dates = None
             
@@ -401,16 +405,23 @@ async def refresh_analysis(
                             comment_dates.append(None)
                     except:
                         comment_dates.append(None)
+            else:
+                # For other platforms, we would implement similar crawling logic
+                raise HTTPException(status_code=400, detail=f"Refresh not supported for platform: {platform}")
             
             results = sentiment_analyzer.analyze_batch(texts)
-            save_sentiment_results(db, new_job.id, results, texts, comment_dates=comment_dates, source_url=source_url)
+            save_sentiment_results(db, new_job.id, results, texts, comment_dates=comment_dates)
             
             positive_count = sum(1 for r in results if r['label'] == 'POSITIVE')
+            neutral_count = sum(1 for r in results if r['label'] == 'NEUTRAL')
+            negative_count = sum(1 for r in results if r['label'] == 'NEGATIVE')
             total = len(results)
             
             new_metadata = {
                 "total_comments": total,
                 "positive_ratio": positive_count / total if total > 0 else 0,
+                "neutral_ratio": neutral_count / total if total > 0 else 0,
+                "negative_ratio": negative_count / total if total > 0 else 0,
                 "source_url": source_url,
                 "platform": platform,
                 "refreshed_from": job_id
