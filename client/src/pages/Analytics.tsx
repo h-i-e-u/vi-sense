@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, MessageSquare, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { TrendingUp, Meh, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { ChartCard } from '../components/ChartCard';
 import { GlassCard } from '../components/GlassCard';
@@ -93,7 +93,7 @@ const Analytics: React.FC = () => {
               </GlassCard>
 
               <GlassCard className="p-6 text-center">
-                <MessageSquare className="h-8 w-8 text-yellow-400 mx-auto mb-3" />
+                <Meh className="h-8 w-8 text-yellow-400 mx-auto mb-3" />
                 <h3 className="text-2xl font-bold text-white mb-1">{analytics?.sentiment_distribution.neutral || 0}</h3>
                 <p className="text-white/60 text-sm">Neutral Sentiments</p>
               </GlassCard>

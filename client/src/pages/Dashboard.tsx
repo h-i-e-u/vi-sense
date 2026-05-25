@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, MessageSquare, FileText, TrendingUp } from "lucide-react";
+import { BarChart3, MessageSquare, FileText, Link } from "lucide-react";
 import { Sidebar } from "../components/Sidebar";
 import { GlassCard } from "../components/GlassCard";
 import { ChartCard } from "../components/ChartCard";
@@ -81,7 +81,7 @@ const Dashboard: React.FC = () => {
     {
       title: "Link Analyses",
       value: analytics?.link_analyses || 0,
-      icon: TrendingUp,
+      icon: Link,
       color: "text-orange-400",
     },
   ];
