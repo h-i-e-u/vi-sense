@@ -20,14 +20,15 @@ router = APIRouter()
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-def create_analysis_job(db: Session, user_id: str, job_type: str) -> models.AnalysisJob:
+def create_analysis_job(db: Session, user_id: str, job_type: str, source_url: Optional[str] = None ) -> models.AnalysisJob:
     """Create a new analysis job"""
     job_id = str(uuid.uuid4())
     job = models.AnalysisJob(
         id=job_id,
         user_id=user_id,
         type=job_type,
-        status="processing"
+        status="processing",
+        source_url=source_url
     )
     db.add(job)
     db.commit()
@@ -40,7 +41,6 @@ def save_sentiment_results(
     results: List[Dict],
     texts: List[str] = None,
     comment_dates: List[Optional[datetime]] = None,
-    source_url: Optional[str] = None
 ):
     """Save sentiment analysis results to database"""
     for i, result in enumerate(results):
@@ -59,7 +59,6 @@ def save_sentiment_results(
                 id=str(uuid.uuid4()),
                 job_id=job_id,
                 text=texts[i],
-                source_url=source_url,
                 source_date=comment_dates[i] if comment_dates and i < len(comment_dates) else None
             )
             db.add(comment)
@@ -148,7 +147,18 @@ async def analyze_link(
     db: Session = Depends(database.get_db)
 ):
     """Analyze sentiment from a URL (YouTube, Shopee, Tiki)"""
-    job = create_analysis_job(db, current_user.id, "link")
+     # 1. CHECK TRÙNG: Tìm theo cột source_url 
+    existing_job = db.query(models.AnalysisJob)\
+        .options(joinedload(models.AnalysisJob.sentiment_results))\
+        .filter(
+            models.AnalysisJob.status == "completed",
+            models.AnalysisJob.source_url == request.url
+        ).first()
+
+    if existing_job:
+        return AnalysisJob.from_orm(existing_job)
+
+    job = create_analysis_job(db, current_user.id, "link", source_url=request.url)
 
     try:
         comment_dates = None
@@ -179,7 +189,7 @@ async def analyze_link(
             ]
 
         results = sentiment_analyzer.analyze_batch(texts)
-        save_sentiment_results(db, job.id, results, texts, comment_dates=comment_dates, source_url=request.url if request.type == 'youtube' else None)
+        save_sentiment_results(db, job.id, results, texts, comment_dates=comment_dates)
 
         # Calculate ratios
         positive_count = sum(1 for r in results if r['label'] == 'POSITIVE')

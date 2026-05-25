@@ -50,6 +50,7 @@ class AnalysisJob(AnalysisJobBase):
     completed_at: Optional[datetime]
     results: Optional[List[SentimentResult]] = Field(validation_alias="sentiment_results")
     metadata: Optional[Dict[str, Any]] = Field(validation_alias="job_metadata")
+    source_url: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -71,7 +72,6 @@ class Comment(BaseModel):
     job_id: str
     text: str
     sentiment: SentimentResult
-    source_url: Optional[str]
     source_date: Optional[datetime] = None
     created_at: datetime
 

@@ -25,6 +25,7 @@ class AnalysisJob(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     completed_at = Column(DateTime(timezone=True), nullable=True)
     job_metadata = Column(JSON, nullable=True)  # Store analysis metadata
+    source_url = Column(String, nullable=True, index=True) 
 
     # Relationships
     user = relationship("User", back_populates="analysis_jobs")
@@ -37,7 +38,6 @@ class Comment(Base):
     id = Column(String, primary_key=True, index=True)
     job_id = Column(String, ForeignKey("analysis_jobs.id"), nullable=False)
     text = Column(Text, nullable=False)
-    source_url = Column(String, nullable=True)
     source_date = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
