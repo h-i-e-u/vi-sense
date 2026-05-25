@@ -17,6 +17,9 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Bar,
+  LabelList,
+  BarChart,
 } from "recharts";
 
 const Dashboard: React.FC = () => {
@@ -58,6 +61,13 @@ const Dashboard: React.FC = () => {
         },
       ]
     : [];
+
+  const stackedData = [
+    pieData.reduce<Record<string, number>>((acc, item) => {
+      acc[item.name] = item.value;
+      return acc;
+    }, {}),
+  ];
 
   const stats = [
     {
@@ -135,7 +145,7 @@ const Dashboard: React.FC = () => {
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Sentiment Distribution */}
               <ChartCard title="Sentiment Distribution">
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={300 - 24}>
                   <PieChart>
                     <Pie
                       data={pieData}
@@ -153,6 +163,50 @@ const Dashboard: React.FC = () => {
                     </Pie>
                     <Tooltip />
                   </PieChart>
+                </ResponsiveContainer>
+
+                <ResponsiveContainer width="100%" height={24}>
+                  <BarChart
+                    data={stackedData}
+                    layout="vertical"
+                    stackOffset="expand"
+                  >
+                    <XAxis type="number" hide domain={[0, 1]} />
+                    <YAxis type="category" hide />
+                    <Tooltip
+                      shared={false}
+                      cursor={false}
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null;
+
+                        const item = payload[0];
+
+                        return (
+                          <div className="rounded-lg bg-zinc-900 px-3 py-2 text-sm text-white shadow-lg">
+                            <p className="font-medium">{item.name}</p>
+                          </div>
+                        );
+                      }}
+                    />
+
+                    {pieData.map((entry, index) => (
+                      <Bar
+                        key={entry.name}
+                        dataKey={entry.name}
+                        stackId="a"
+                        fill={entry.color}
+                        stroke="transparent"
+                        strokeWidth={8}
+                        radius={
+                          index === 0
+                            ? [8, 0, 0, 8]
+                            : index === pieData.length - 1
+                              ? [0, 8, 8, 0]
+                              : [0, 0, 0, 0]
+                        }
+                      />
+                    ))}
+                  </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
 
@@ -189,6 +243,7 @@ const Dashboard: React.FC = () => {
                         backgroundColor: "rgba(0, 0, 0, 0.8)",
                         border: "1px solid rgba(255, 255, 255, 0.2)",
                         borderRadius: "8px",
+                        color: "#FFFFFF",
                       }}
                     />
                     <Line
@@ -202,8 +257,6 @@ const Dashboard: React.FC = () => {
                 </ResponsiveContainer>
               </ChartCard>
             </div>
-
-          
           </div>
         </div>
       </div>

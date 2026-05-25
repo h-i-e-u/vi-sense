@@ -6,11 +6,11 @@ import { ChartCard } from '../components/ChartCard';
 import { GlassCard } from '../components/GlassCard';
 import { SentimentBadge } from '../components/SentimentBadge';
 import { analyticsAPI } from '../services/api';
-import { AnalyticsSummary } from '../types';
+import { UserAnalyticsSummary } from '../types';
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
 
 const Analytics: React.FC = () => {
-  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
+  const [analytics, setAnalytics] = useState<UserAnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -128,49 +128,9 @@ const Analytics: React.FC = () => {
                 </ResponsiveContainer>
               </ChartCard>
 
-              {/* Trend Chart */}
-              <ChartCard title="Sentiment Trends (7 Days)">
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={analytics?.trend_data || []}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis
-                      dataKey="date"
-                      stroke="#9CA3AF"
-                      fontSize={12}
-                    />
-                    <YAxis stroke="#9CA3AF" fontSize={12} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        borderRadius: '8px'
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="positive"
-                      stroke="#10B981"
-                      strokeWidth={2}
-                      name="Positive"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="neutral"
-                      stroke="#F59E0B"
-                      strokeWidth={2}
-                      name="Neutral"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="negative"
-                      stroke="#EF4444"
-                      strokeWidth={2}
-                      name="Negative"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartCard>
-            </div>
+             
+              
+            
 
             {/* Top Keywords */}
             <ChartCard title="Top Keywords">
@@ -190,7 +150,8 @@ const Analytics: React.FC = () => {
                     contentStyle={{
                       backgroundColor: 'rgba(0, 0, 0, 0.8)',
                       border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      color: '#FFFFFF',
                     }}
                   />
                   <Bar dataKey="value" fill="#8B5CF6" />
@@ -198,52 +159,8 @@ const Analytics: React.FC = () => {
               </ResponsiveContainer>
             </ChartCard>
 
-            {/* Top Comments */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              <ChartCard title="Top Positive Comments">
-                <div className="space-y-4">
-                  {analytics?.top_positive_comments?.slice(0, 5).map((comment, index) => (
-                    <motion.div
-                      key={comment.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className="p-4 bg-green-500/10 rounded-lg border border-green-500/20"
-                    >
-                      <p className="text-white text-sm line-clamp-3 mb-2">{comment.text}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-white/60 text-xs">
-                          {new Date(comment.created_at).toLocaleDateString()}
-                        </span>
-                        <SentimentBadge sentiment="POSITIVE" />
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </ChartCard>
-
-              <ChartCard title="Top Negative Comments">
-                <div className="space-y-4">
-                  {analytics?.top_negative_comments?.slice(0, 5).map((comment, index) => (
-                    <motion.div
-                      key={comment.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className="p-4 bg-red-500/10 rounded-lg border border-red-500/20"
-                    >
-                      <p className="text-white text-sm line-clamp-3 mb-2">{comment.text}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-white/60 text-xs">
-                          {new Date(comment.created_at).toLocaleDateString()}
-                        </span>
-                        <SentimentBadge sentiment="NEGATIVE" />
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </ChartCard>
             </div>
+            {/* words cloud implement some day Owo */}
           </div>
         </div>
       </div>
