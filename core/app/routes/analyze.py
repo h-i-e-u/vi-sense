@@ -427,6 +427,9 @@ async def refresh_analysis(
                 "refreshed_from": job_id
             }
             update_job_status(db, new_job.id, "completed", new_metadata)
+
+            db.delete(original_job)
+            db.commit()
     
     except HTTPException:
         update_job_status(db, new_job.id, "failed")

@@ -66,6 +66,7 @@ const DetailAnalytics: React.FC = () => {
       setAnalytics(analyticsData);
 
       alert("Analysis refreshed successfully!");
+      navigate(`/analytics/${refreshedJob.id}`, { replace: true });
     } catch (err) {
       console.error("Failed to refresh analysis:", err);
       alert("Failed to refresh analysis. Please try again.");
