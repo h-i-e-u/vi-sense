@@ -118,3 +118,30 @@ class UserAnalyticsSummary(BaseModel):
     sentiment_distribution: SentimentDistribution
     daily_analysis_counts: List[DailyAnalysisCount]
     top_keywords: List[TopKeyword]
+
+class SentenceJobInfo(BaseModel):
+    id: str
+    type: str  # 'text', 'link', 'file'
+    
+    class Config:
+        from_attributes = True
+
+class SentenceResponse(BaseModel):
+    id: str
+    job_id: str
+    comment_id: Optional[str] = None
+    text: str
+    label: str  # 'POSITIVE', 'NEGATIVE', 'NEUTRAL'
+    confidence: float
+    created_at: datetime
+    job: SentenceJobInfo  # Kèm thông tin job để frontend biết nguồn từ đâu
+
+    class Config:
+        from_attributes = True
+
+class PaginatedSentencesResponse(BaseModel):
+    total: int
+    page: int
+    limit: int
+    total_pages: int
+    items: List[SentenceResponse]

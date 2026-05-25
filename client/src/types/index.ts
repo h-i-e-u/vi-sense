@@ -115,3 +115,35 @@ export interface AnalyzeLinkRequest {
 export interface AnalyzeFileRequest {
   file: File;
 }
+
+export interface SentenceJobInfo {
+  id: string;
+  type: 'text' | 'link' | 'file';
+}
+
+export interface SentenceItem {
+  id: string;
+  job_id: string;
+  comment_id: string | null;
+  text: string;
+  label: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+  confidence: number;
+  created_at: string;
+  job: SentenceJobInfo;
+}
+
+export interface PaginatedSentencesResponse {
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+  items: SentenceItem[];
+}
+
+export interface SentenceQueryParams {
+  page: number;
+  limit: number;
+  search?: string;
+  job_type?: string;
+  label?: string;
+}

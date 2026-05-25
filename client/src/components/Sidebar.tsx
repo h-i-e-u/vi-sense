@@ -50,7 +50,7 @@ const menuItems = [
     icon: TrendingUp,
   },
   {
-    path: "/all-sentences",
+    path: "/sentences",
     label: "All Sentences",
     icon: TableProperties,
   },

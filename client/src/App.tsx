@@ -11,6 +11,7 @@ import History from "./pages/History";
 import Analytics from "./pages/Analytics";
 import DetailAnalytics from "./pages/DetailAnalytics";
 import NotFound from "./pages/NotFound";
+import AllSentences from "./pages/AllSentences";
 // import './App.css'
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/history" element={<History />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/analytics/:jobId" element={<DetailAnalytics />} />
+          <Route path="/sentences" element={<AllSentences />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster position="top-right" />

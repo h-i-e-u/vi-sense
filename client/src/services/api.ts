@@ -8,7 +8,9 @@ import {
   AnalyzeFileRequest,
   AnalysisJob,
   AnalyticsSummary,
-  UserAnalyticsSummary
+  UserAnalyticsSummary,
+  SentenceQueryParams,
+  PaginatedSentencesResponse
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -147,6 +149,13 @@ export const analyticsAPI = {
 
   getJobAnalytics: async (jobId: string): Promise<AnalyticsSummary> => {
     const response = await api.get(`/analytics/job/${jobId}`);
+    return response.data;
+  },
+};
+
+export const sentencesAPI = {
+  getProcessedSentences: async (params: SentenceQueryParams): Promise<PaginatedSentencesResponse> => {
+    const response = await api.get('/sentences', { params });
     return response.data;
   },
 };
