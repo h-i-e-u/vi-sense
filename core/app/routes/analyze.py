@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks, status, Response
 from sqlalchemy.orm import Session, joinedload
 from ..models import database, models
 from ..schemas import (
@@ -143,6 +143,7 @@ async def analyze_text(
 async def analyze_link(
     request: AnalyzeLinkRequest,
     background_tasks: BackgroundTasks,
+    response: Response,
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(database.get_db)
 ):
@@ -156,8 +157,10 @@ async def analyze_link(
         ).first()
 
     if existing_job:
+        response.status_code = status.HTTP_200_OK
         return AnalysisJob.from_orm(existing_job)
 
+    # Create NEW job
     job = create_analysis_job(db, current_user.id, "link", source_url=request.url)
 
     try:
@@ -216,6 +219,7 @@ async def analyze_link(
         joinedload(models.AnalysisJob.sentiment_results)
     ).filter(models.AnalysisJob.id == job.id).first()
 
+    response.status_code = status.HTTP_201_CREATED
     return AnalysisJob.from_orm(job)
 
 @router.post("/file", response_model=AnalysisJob)
