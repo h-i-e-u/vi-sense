@@ -9,6 +9,7 @@ import {
   MessageSquare,
   TrendingUp,
   LogOut,
+  TableProperties,
 } from "lucide-react";
 import { cn } from "../utils/cn";
 import toast from "react-hot-toast";
@@ -48,6 +49,11 @@ const menuItems = [
     label: "Analytics",
     icon: TrendingUp,
   },
+  {
+    path: "/all-sentences",
+    label: "All Sentences",
+    icon: TableProperties,
+  },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
@@ -63,7 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   return (
     <div
       className={cn(
-        "w-64 glass rounded-xl p-6 flex flex-col h-[calc(100vh-1rem)]",
+        "w-64 glass rounded-xl p-6 flex flex-col h-[calc(100vh+2rem)]",
         className,
       )}
     >

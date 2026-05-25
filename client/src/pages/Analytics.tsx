@@ -1,13 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { TrendingUp, Meh, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { Sidebar } from '../components/Sidebar';
-import { ChartCard } from '../components/ChartCard';
-import { GlassCard } from '../components/GlassCard';
-import { SentimentBadge } from '../components/SentimentBadge';
-import { analyticsAPI } from '../services/api';
-import { UserAnalyticsSummary } from '../types';
-import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { TrendingUp, Meh, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Sidebar } from "../components/Sidebar";
+import { ChartCard } from "../components/ChartCard";
+import { GlassCard } from "../components/GlassCard";
+import { SentimentBadge } from "../components/SentimentBadge";
+import { analyticsAPI } from "../services/api";
+import { UserAnalyticsSummary } from "../types";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  BarChart,
+  Bar,
+} from "recharts";
 
 const Analytics: React.FC = () => {
   const [analytics, setAnalytics] = useState<UserAnalyticsSummary | null>(null);
@@ -19,7 +32,7 @@ const Analytics: React.FC = () => {
         const data = await analyticsAPI.getSummary();
         setAnalytics(data);
       } catch (error) {
-        console.error('Failed to fetch analytics:', error);
+        console.error("Failed to fetch analytics:", error);
       } finally {
         setLoading(false);
       }
@@ -28,17 +41,32 @@ const Analytics: React.FC = () => {
     fetchAnalytics();
   }, []);
 
-  const pieData = analytics ? [
-    { name: 'Positive', value: analytics.sentiment_distribution.positive, color: '#10B981' },
-    { name: 'Neutral', value: analytics.sentiment_distribution.neutral, color: '#F59E0B' },
-    { name: 'Negative', value: analytics.sentiment_distribution.negative, color: '#EF4444' },
-  ] : [];
+  const pieData = analytics
+    ? [
+        {
+          name: "Positive",
+          value: analytics.sentiment_distribution.positive,
+          color: "#10B981",
+        },
+        {
+          name: "Neutral",
+          value: analytics.sentiment_distribution.neutral,
+          color: "#F59E0B",
+        },
+        {
+          name: "Negative",
+          value: analytics.sentiment_distribution.negative,
+          color: "#EF4444",
+        },
+      ]
+    : [];
 
-  const keywordData = analytics?.top_keywords?.slice(0, 10).map((kw, index) => ({
-    name: kw.word,
-    value: kw.count,
-    fill: `hsl(${index * 36}, 70%, 50%)`
-  })) || [];
+  const keywordData =
+    analytics?.top_keywords?.slice(0, 10).map((kw, index) => ({
+      name: kw.word,
+      value: kw.count,
+      fill: `hsl(${index * 36}, 70%, 50%)`,
+    })) || [];
 
   if (loading) {
     return (
@@ -74,38 +102,50 @@ const Analytics: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="glass rounded-xl p-6"
             >
-              <h1 className="text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
-              <p className="text-white/60">Comprehensive insights into your sentiment analysis data</p>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                Analytics Dashboard
+              </h1>
+              <p className="text-white/60">
+                Comprehensive insights into your sentiment analysis data
+              </p>
             </motion.div>
 
             {/* Key Metrics */}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <GlassCard className="p-6 text-center">
                 <TrendingUp className="h-8 w-8 text-blue-400 mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-white mb-1">{analytics?.total_analyses || 0}</h3>
+                <h3 className="text-2xl font-bold text-white mb-1">
+                  {analytics?.total_analyses || 0}
+                </h3>
                 <p className="text-white/60 text-sm">Total Analyses</p>
               </GlassCard>
 
               <GlassCard className="p-6 text-center">
                 <ThumbsUp className="h-8 w-8 text-green-400 mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-white mb-1">{analytics?.sentiment_distribution.positive || 0}</h3>
+                <h3 className="text-2xl font-bold text-white mb-1">
+                  {analytics?.sentiment_distribution.positive || 0}
+                </h3>
                 <p className="text-white/60 text-sm">Positive Sentiments</p>
               </GlassCard>
 
               <GlassCard className="p-6 text-center">
                 <Meh className="h-8 w-8 text-yellow-400 mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-white mb-1">{analytics?.sentiment_distribution.neutral || 0}</h3>
+                <h3 className="text-2xl font-bold text-white mb-1">
+                  {analytics?.sentiment_distribution.neutral || 0}
+                </h3>
                 <p className="text-white/60 text-sm">Neutral Sentiments</p>
               </GlassCard>
 
               <GlassCard className="p-6 text-center">
                 <ThumbsDown className="h-8 w-8 text-red-400 mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-white mb-1">{analytics?.sentiment_distribution.negative || 0}</h3>
+                <h3 className="text-2xl font-bold text-white mb-1">
+                  {analytics?.sentiment_distribution.negative || 0}
+                </h3>
                 <p className="text-white/60 text-sm">Negative Sentiments</p>
               </GlassCard>
             </div>
 
-            {/* Charts */}
+            {/* Charts and top keywords */}
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Sentiment Distribution */}
               <ChartCard title="Sentiment Distribution">
@@ -117,7 +157,9 @@ const Analytics: React.FC = () => {
                       cy="50%"
                       outerRadius={80}
                       dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) =>
+                        `${name} ${(percent * 100).toFixed(0)}%`
+                      }
                     >
                       {pieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -128,37 +170,32 @@ const Analytics: React.FC = () => {
                 </ResponsiveContainer>
               </ChartCard>
 
-             
-              
-            
-
-            {/* Top Keywords */}
-            <ChartCard title="Top Keywords">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={keywordData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis
-                    dataKey="name"
-                    stroke="#9CA3AF"
-                    fontSize={12}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis stroke="#9CA3AF" fontSize={12} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '8px',
-                      color: '#FFFFFF',
-                    }}
-                  />
-                  <Bar dataKey="value" fill="#8B5CF6" />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartCard>
-
+              {/* Top Keywords */}
+              <ChartCard title="Top Keywords">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={keywordData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis
+                      dataKey="name"
+                      stroke="#9CA3AF"
+                      fontSize={14}
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                    />
+                    <YAxis stroke="#9CA3AF" fontSize={12} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "rgba(0, 0, 0, 0.8)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        borderRadius: "8px",
+                        color: "#FFFFFF",
+                      }}
+                    />
+                    <Bar dataKey="value" fill="#8B5CF6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
             </div>
             {/* words cloud implement some day Owo */}
           </div>
