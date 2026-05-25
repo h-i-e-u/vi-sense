@@ -14,6 +14,8 @@ import { sentencesAPI } from "../services/api";
 import { AnimatedButton } from "../components/AnimatedButton";
 import { GlassCard } from "../components/GlassCard";
 import { useNavigate } from "react-router-dom";
+import { SentimentBadge } from "../components/SentimentBadge";
+import toast from "react-hot-toast";
 
 const AllSentences: React.FC = () => {
   const [sentences, setSentences] = useState<SentenceItem[]>([]);
@@ -22,8 +24,13 @@ const AllSentences: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [page, setPage] = useState<number>(1);
+  const [prevPage, setPrevPage] = useState<number>(1);
   const [limit] = useState<number>(10);
+
+  // search là text send to api, searchInput là text user đang gõ
   const [search, setSearch] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>("");
+
   const [jobType, setJobType] = useState<string>("");
   const [label, setLabel] = useState<string>("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -43,8 +50,11 @@ const AllSentences: React.FC = () => {
       setSentences(data.items || []);
       setTotal(data.total || 0);
       setTotalPages(data.total_pages || 0);
+      setPrevPage(page);
     } catch (error) {
       console.error("Lỗi khi tải danh sách câu:", error);
+      toast.error("Network or server error: " + error);
+      setPage(prevPage);
     } finally {
       setLoading(false);
     }
@@ -52,16 +62,18 @@ const AllSentences: React.FC = () => {
 
   useEffect(() => {
     fetchSentences();
-  }, [page, jobType, label]);
+  }, [page, jobType, label, search]);
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      setPage(1);
-      fetchSentences();
-    }, 500);
+  const handleTriggerSearch = () => {
+    setPage(1);
+    setSearch(searchInput);
+  };
 
-    return () => clearTimeout(delayDebounceFn);
-  }, [search]);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleTriggerSearch();
+    }
+  };
 
   const handleCopy = (text: string, id: string): void => {
     navigator.clipboard.writeText(text);
@@ -82,21 +94,6 @@ const AllSentences: React.FC = () => {
     }
   };
 
-  const renderLabelBadge = (sentimentLabel: string) => {
-    const styles: Record<string, string> = {
-      POSITIVE: "bg-green-100 text-green-800 border-green-200",
-      NEGATIVE: "bg-red-100 text-red-800 border-red-200",
-      NEUTRAL: "bg-gray-100 text-gray-800 border-gray-200",
-    };
-    return (
-      <span
-        className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${styles[sentimentLabel] || styles.NEUTRAL}`}
-      >
-        {sentimentLabel}
-      </span>
-    );
-  };
-
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -113,7 +110,7 @@ const AllSentences: React.FC = () => {
         <div className="flex flex-col gap-2">
           <AnimatedButton
             onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors text-sm whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-white rounded-lg transition-colors text-sm whitespace-nowrap"
           >
             Dashboard
             <ChevronRight className="h-4 w-4" />
@@ -122,57 +119,76 @@ const AllSentences: React.FC = () => {
       </GlassCard>
 
       {/* Filters */}
-      <GlassCard className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
+      <GlassCard className="p-4 flex flex-col md:flex-row gap-4 justify-between items-center">
         <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <button type="button" onClick={handleTriggerSearch}>
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-200" />
+          </button>
           <input
             type="text"
             placeholder="Search text..."
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            value={search}
+            className="w-full pl-9 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm focus:bg-purple-950/80  focus:border-purple-400/40"
+            value={searchInput}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearch(e.target.value)
+              setSearchInput(e.target.value)
             }
+            onKeyDown={handleKeyDown}
           />
         </div>
 
-        <div className="flex flex-wrap gap-3 w-full md:w-auto justify-end">
+        <div className="flex flex-wrap gap-3 w-full md:w-auto justify-end text-gray-200">
           <select
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 bg-purple-950/80 border border-purple-400/40 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-white cursor-pointer"
             value={jobType}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               setJobType(e.target.value);
               setPage(1);
             }}
           >
-            <option value="">All Type</option>
-            <option value="text">Text Input</option>
-            <option value="link">Web Link</option>
-            <option value="file">Uploaded File</option>
+            <option value="" className="bg-purple-950 text-white">
+              All Type
+            </option>
+            <option value="text" className="bg-purple-950 text-white">
+              Text Input
+            </option>
+            <option value="link" className="bg-purple-950 text-white">
+              Web Link
+            </option>
+            <option value="file" className="bg-purple-950 text-white">
+              Uploaded File
+            </option>
           </select>
 
           <select
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 bg-purple-950/80 border border-purple-400/40 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-white cursor-pointer"
             value={label}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               setLabel(e.target.value);
               setPage(1);
             }}
           >
-            <option value="">All Sentiment</option>
-            <option value="POSITIVE">Positive</option>
-            <option value="NEGATIVE">Negative</option>
-            <option value="NEUTRAL">Neutral</option>
+            <option value="" className="bg-purple-950 text-white">
+              All Sentiment
+            </option>
+            <option value="POSITIVE" className="bg-purple-950 text-white">
+              Positive
+            </option>
+            <option value="NEGATIVE" className="bg-purple-950 text-white">
+              Negative
+            </option>
+            <option value="NEUTRAL" className="bg-purple-950 text-white">
+              Neutral
+            </option>
           </select>
         </div>
       </GlassCard>
 
       {/* Table */}
-      <GlassCard className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <GlassCard>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse ">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <tr className="bg-gray-200/50 border-b rounded-md border-gray-200 text-xs font-semibold text-gray-900 uppercase tracking-wider">
                 <th className="px-6 py-3 w-16 text-center">Source</th>
                 <th className="px-6 py-3">text</th>
                 <th className="px-6 py-3 w-32">result</th>
@@ -181,19 +197,16 @@ const AllSentences: React.FC = () => {
                 <th className="px-6 py-3 w-16 text-center">Copy</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 text-sm text-gray-700">
+            <tbody className="divide-y divide-gray-200 text-sm text-gray-200">
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td
-                      colSpan={6}
-                      className="px-6 py-4 bg-gray-50/50 h-12"
-                    ></td>
+                    <td colSpan={6} className="px-6 py-4 bg-inherit h-12"></td>
                   </tr>
                 ))
               ) : sentences.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-gray-400">
+                  <td colSpan={6} className="text-center py-12 text-gray-200">
                     No matching data was found.
                   </td>
                 </tr>
@@ -201,29 +214,29 @@ const AllSentences: React.FC = () => {
                 sentences.map((item) => (
                   <tr
                     key={item.id}
-                    className="hover:bg-gray-50 transition-colors"
+                    className="hover:bg-gray-50/25 transition-colors"
                   >
                     <td className="px-6 py-4 text-center">
                       <div className="flex justify-center">
                         {renderSourceIcon(item.job?.type)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-medium text-gray-900 max-w-md break-words">
+                    <td className="px-6 py-4 font-medium text-gray-200 max-w-md break-words">
                       {item.text}
                     </td>
                     <td className="px-6 py-4">
-                      {renderLabelBadge(item.label)}
+                      <SentimentBadge sentiment={item.label} />
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-gray-500">
+                    <td className="px-6 py-4 font-mono text-sm text-gray-200">
                       {(item.confidence * 100).toFixed(1)}%
                     </td>
-                    <td className="px-6 py-4 text-xs text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-200">
                       {new Date(item.created_at).toLocaleString("vi-VN")}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button
                         onClick={() => handleCopy(item.text, item.id)}
-                        className="text-gray-400 hover:text-blue-600 transition-colors focus:outline-none"
+                        className="text-gray-400 hover:text-blue-900 transition-colors focus:outline-none"
                       >
                         {copiedId === item.id ? (
                           <Check className="w-4 h-4 text-green-500" />
@@ -240,10 +253,10 @@ const AllSentences: React.FC = () => {
         </div>
 
         {/* Pagination using AnimatedButton */}
-        <div className="bg-white px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div className="text-xs text-gray-500">
-            Page <span className="font-semibold text-gray-700">{page}</span> out
-            of <span className="font-semibold text-gray-700">{totalPages}</span>{" "}
+        <div className="bg-gray-200/50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+          <div className="text-sm text-gray-700">
+            Page <span className="font-semibold text-gray-900">{page}</span> out
+            of <span className="font-semibold text-gray-900">{totalPages}</span>{" "}
             page of ({total} result)
           </div>
           <div className="flex items-center space-x-2">
