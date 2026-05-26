@@ -134,6 +134,9 @@ const AllSentences: React.FC = () => {
             }
             onKeyDown={handleKeyDown}
           />
+          <kbd className="absolute right-2 top-2 px-1 bg-gray-400 text-slate-700 text-sm rounded">
+            enter
+          </kbd>
         </div>
 
         <div className="flex flex-wrap gap-3 w-full md:w-auto justify-end text-gray-200">
