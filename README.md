@@ -37,7 +37,8 @@ A modern fullstack application for analyzing Vietnamese sentiment from YouTube c
 vi-sense/
 ├── client/          # React frontend
 ├── core/           # FastAPI backend
-├── crawler/        # Crawler services
+|   ├── app/        # main bussiness services
+|   └── crawler/        # Crawler services
 ├── docker/         # Docker configs
 └── docs/           # Documentation
 ```
