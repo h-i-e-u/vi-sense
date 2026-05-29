@@ -1,5 +1,6 @@
 import os
 import re
+import threading
 import torch
 from collections import Counter
 from typing import List, Dict, Any
@@ -43,8 +44,10 @@ class SentimentAnalyzer:
         self.pipeline = None
         self.tokenizer = None
         self.model = None
+        self._model_loaded = False
+        self._model_lock = threading.Lock()
 
-        self._load_model()
+        print(f"SentimentAnalyzer initialized with lazy {self.model_type} model loading")
 
     # =================================================
     # LOAD MODEL
@@ -63,6 +66,16 @@ class SentimentAnalyzer:
             raise ValueError(
                 f"Unsupported model: {self.model_type}"
             )
+
+        self._model_loaded = True
+
+    def _ensure_model_loaded(self):
+        if self._model_loaded:
+            return
+
+        with self._model_lock:
+            if not self._model_loaded:
+                self._load_model()
 
     # =================================================
     # HUGGINGFACE MODEL
@@ -128,6 +141,8 @@ class SentimentAnalyzer:
         self,
         text: str
     ) -> Dict[str, Any]:
+
+        self._ensure_model_loaded()
 
         processed = preprocess_text(text)
 

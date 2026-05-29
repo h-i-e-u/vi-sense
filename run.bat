@@ -1,8 +1,14 @@
 @echo off
+setlocal
+
+set "ROOT_DIR=%~dp0"
+set "CORE_DIR=%ROOT_DIR%core"
+set "CLIENT_DIR=%ROOT_DIR%client"
+
 echo Starting Vi-Sense...
 
 echo Setting up backend...
-cd core
+cd /d "%CORE_DIR%"
 if not exist venv (
     python -m venv venv
 )
@@ -11,16 +17,16 @@ pip install -r requirements.txt
 python init_db.py
 
 echo Starting backend server...
-start cmd /k "cd core && call venv\Scripts\activate.bat && python run.py"
+start "Vi-Sense Backend" cmd /k ""cd /d "%CORE_DIR%" && call venv\Scripts\activate.bat && python run.py""
 
 echo Setting up frontend...
-cd ../client
+cd /d "%CLIENT_DIR%"
 if not exist node_modules (
     npm install
 )
 
 echo Starting frontend server...
-start cmd /k "cd client && npm run dev"
+start "Vi-Sense Frontend" cmd /k ""cd /d "%CLIENT_DIR%" && npm run dev""
 
 echo Vi-Sense is running!
 echo Backend: http://localhost:8000
