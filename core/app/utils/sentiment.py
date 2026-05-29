@@ -4,121 +4,245 @@ import torch
 from collections import Counter
 from typing import List, Dict, Any
 from dotenv import load_dotenv
+from app.utils.hybrid_phobert import HybridPhoBERTClassifier
+from app.utils.text_preprocess import preprocess_text
+from transformers import pipeline, AutoTokenizer
+from pathlib import Path
+
 
 load_dotenv()
 
+# Label mapping
+LABEL_MAPPING = {
+    'NEG': 'NEGATIVE',
+    'NEU': 'NEUTRAL',
+    'POS': 'POSITIVE'
+}
+
+ID2LABEL = {
+    0: 'NEGATIVE',
+    1: 'POSITIVE',
+    2: 'NEUTRAL'
+}
+
 class SentimentAnalyzer:
+
     def __init__(self):
-        self.model_name = "wonrax/phobert-base-vietnamese-sentiment"
+
+        self.model_type = os.getenv(
+            "SENTIMENT_MODEL",
+            "custom"
+        ).lower()
+
+        self.device = torch.device(
+            "cuda"
+            if torch.cuda.is_available()
+            else "cpu"
+        )
+
+        self.pipeline = None
         self.tokenizer = None
         self.model = None
-        self.pipeline = None
+
         self._load_model()
 
+    # =================================================
+    # LOAD MODEL
+    # =================================================
     def _load_model(self):
-        """Load the PhoBERT sentiment analysis model"""
-        try:
-            from transformers import pipeline
 
-            self.pipeline = pipeline(
-                "sentiment-analysis",
-                model=self.model_name,
-                tokenizer=self.model_name,
-                device=0 if torch.cuda.is_available() else -1
-            )
-        except Exception as e:
-            print(f"Error loading model: {e}")
-            from transformers import pipeline
+        if self.model_type == "huggingface":
 
-            self.pipeline = pipeline(
-                "sentiment-analysis",
-                model=self.model_name,
-                tokenizer=self.model_name,
-                device=-1
+            self._load_huggingface_model()
+
+        elif self.model_type == "custom":
+
+            self._load_custom_model()
+
+        else:
+            raise ValueError(
+                f"Unsupported model: {self.model_type}"
             )
 
-    def preprocess_text(self, text: str) -> str:
-        """Preprocess Vietnamese text for better sentiment analysis"""
-        # Normalize whitespace
-        text = re.sub(r'\s+', ' ', text.strip())
+    # =================================================
+    # HUGGINGFACE MODEL
+    # =================================================
+    def _load_huggingface_model(self):
 
-        # Handle emojis (keep them as they can indicate sentiment)
-        # Basic emoji normalization could be added here
+        print("Using HuggingFace model")
 
-        # Remove excessive punctuation
-        text = re.sub(r'[.!?]{2,}', '.', text)
+        self.pipeline = pipeline(
+            "sentiment-analysis",
+            model="wonrax/phobert-base-vietnamese-sentiment",
+            tokenizer="wonrax/phobert-base-vietnamese-sentiment",
+            device=0 if torch.cuda.is_available() else -1
+        )
 
-        return text
+    # =================================================
+    # CUSTOM MODEL
+    # =================================================
+    def _load_custom_model(self):
 
-    def analyze_text(self, text: str) -> Dict[str, Any]:
-        """Analyze sentiment of a single text"""
-        if not self.pipeline:
-            raise Exception("Model not loaded")
+        print("Using custom PhoBERT model")
 
-        processed_text = self.preprocess_text(text)
+        base_dir = Path(__file__).resolve().parent
 
-        result = self.pipeline(processed_text)[0]
 
-        # Map model outputs to our labels
-        label_mapping = {
-            'NEG': 'NEGATIVE',
-            'NEU': 'NEUTRAL',
-            'POS': 'POSITIVE'
-        }
+        model_path = (
+            base_dir.parent.parent
+            / "best_phobert_model"
+        )
+
+        model_path = str(model_path)
+        print(model_path)
+        print(os.path.exists(model_path))
+        print(os.listdir(model_path))
+
+        self.tokenizer = (
+            AutoTokenizer.from_pretrained(
+                model_path, local_files_only=True
+            )
+        )
+
+        self.model = HybridPhoBERTClassifier()
+
+        self.model.load_state_dict(
+            torch.load(
+                os.path.join(
+                    model_path,
+                    "phobert_sentiment.pth"
+                ),
+                map_location=self.device
+            ),
+            strict=False    
+        )
+
+        self.model.to(self.device)
+
+        self.model.eval()
+
+    # =================================================
+    # SINGLE TEXT
+    # =================================================
+    def analyze_text(
+        self,
+        text: str
+    ) -> Dict[str, Any]:
+
+        processed = preprocess_text(text)
+
+        # =============================================
+        # HUGGINGFACE
+        # =============================================
+        if self.model_type == "huggingface":
+
+            result = self.pipeline(processed)[0]
+
+            return {
+                "label": LABEL_MAPPING.get(
+                    result["label"],
+                    "ERROR"
+                ),
+                "confidence": float(result["score"]),
+                "text": text
+            }
+
+        # =============================================
+        # CUSTOM MODEL
+        # =============================================
+        encoding = self.tokenizer(
+            processed,
+            truncation=True,
+            padding=True,
+            max_length=128,
+            return_tensors="pt"
+        )
+
+        input_ids = encoding["input_ids"].to(
+            self.device
+        )
+
+        attention_mask = encoding[
+            "attention_mask"
+        ].to(self.device)
+
+        with torch.no_grad():
+
+            outputs = self.model(
+                input_ids=input_ids,
+                attention_mask=attention_mask
+            )
+
+            probs = torch.softmax(
+                outputs.logits,
+                dim=1
+            )
+
+            confidence, pred_id = torch.max(
+                probs,
+                dim=1
+            )
 
         return {
-            'label': label_mapping.get(result['label'], 'err'),
-            'confidence': float(result['score']),
-            'text': text
+            "label": ID2LABEL[pred_id.item()],
+            "confidence": float(confidence.item()),
+            "text": text
         }
 
-    def analyze_batch(self, texts: List[str]) -> List[Dict[str, Any]]:
-        """Analyze sentiment of multiple texts"""
-        if not self.pipeline:
-            raise Exception("Model not loaded")
-
-        processed_texts = [self.preprocess_text(text) for text in texts]
-
-        results = self.pipeline(processed_texts)
-
-        label_mapping = {
-            'NEG': 'NEGATIVE',
-            'NEU': 'NEUTRAL',
-            'POS': 'POSITIVE'
-        }
+    # =================================================
+    # BATCH
+    # =================================================
+    def analyze_batch(
+        self,
+        texts: List[str]
+    ):
 
         return [
-            {
-                'label': label_mapping.get(result['label'], 'ERR'),
-                'confidence': float(result['score']),
-                'text': text
-            }
-            for result, text in zip(results, texts)
+            self.analyze_text(text)
+            for text in texts
         ]
 
-    def extract_keywords(self, texts: List[str], top_n: int = 10) -> List[Dict[str, int]]:
-        """Extract most common keywords from texts (basic implementation)"""
-        from collections import Counter
-        # import jieba
+    # =================================================
+    # KEYWORDS
+    # =================================================
+    def extract_keywords(
+        self,
+        texts: List[str],
+        top_n: int = 10
+    ):
 
-        # Simple Vietnamese word segmentation (you might want to use a better library)
         all_words = []
+
+        stop_words = {
+            'là', 'và', 'của',
+            'có', 'được', 'cho'
+        }
+
         for text in texts:
-            # Basic tokenization - in production, use proper Vietnamese NLP tools
+
             words = text.lower().split()
-            # Remove common Vietnamese stop words
-            stop_words = {'là', 'và', 'của', 'có', 'được', 'cho', 'với', 'trong', 'lên', 'như'}
-            words = [word for word in words if word not in stop_words and len(word) > 1]
+
+            words = [
+                word for word in words
+                if word not in stop_words
+                and len(word) > 1
+            ]
+
             all_words.extend(words)
 
         word_counts = Counter(all_words)
+
         return [
-            {'word': word, 'count': count}
-            for word, count in word_counts.most_common(top_n)
+            {
+                "word": word,
+                "count": count
+            }
+            for word, count
+            in word_counts.most_common(top_n)
         ]
+    
 
-# Global instance
-
+# this thing only for development.
 class FakeSentimentAnalyzer:
     def __init__(self):
         self.pipeline = None
@@ -185,5 +309,5 @@ if _use_fake_analyzer():
     print('Using fake SentimentAnalyzer for development')
     sentiment_analyzer = FakeSentimentAnalyzer()
 else:
-    print("hell Nah")
+    print("Hell Nah")
     sentiment_analyzer = SentimentAnalyzer()
