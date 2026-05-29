@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Link as LinkIcon } from "lucide-react";
 import { Sidebar } from "../components/Sidebar";
@@ -6,36 +6,57 @@ import { GlassCard } from "../components/GlassCard";
 import { SentimentBadge } from "../components/SentimentBadge";
 import { AnimatedButton } from "../components/AnimatedButton";
 import { LoadingOverlay } from "../components/LoadingOverlay";
-import { analysisAPI, getErrorMessage, historyAPI } from "../services/api";
+import { analysisAPI, getErrorMessage } from "../services/api";
 import { AnalysisJob } from "../types";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
+type Platform = "youtube" | "shopee" | "tiki";
+
+const quickLinks: Array<{ label: string; platform: Platform; url: string }> = [
+  {
+    label: "YouTube demo",
+    platform: "youtube",
+    url: "https://www.youtube.com/watch?v=OXxrKwQ3DRM",
+  },
+  {
+    label: "Tiki demo",
+    platform: "tiki",
+    url: "https://tiki.vn/thanh-guom-diet-quy-tap-1-tan-khoc-p278496130.html?spid=278496147",
+  },
+];
+
 const AnalyzeLink: React.FC = () => {
   const [url, setUrl] = useState("");
-  const [platform, setPlatform] = useState<"youtube" | "shopee" | "tiki">(
-    "youtube",
-  );
+  const [platform, setPlatform] = useState<Platform>("youtube");
   const [result, setResult] = useState<AnalysisJob | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCache, setIsCache] = useState(false);
   const navigate = useNavigate();
 
   const platformExamples = {
-    youtube: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    youtube: "https://www.youtube.com/watch?v=OXxrKwQ3DRM",
     shopee: "https://shopee.vn/product/123456789/987654321",
-    tiki: "https://tiki.vn/product-p123456.html",
+    tiki: "https://tiki.vn/thanh-guom-diet-quy-tap-1-tan-khoc-p278496130.html?spid=278496147",
   };
 
-  const handleAnalyze = async () => {
-    if (!url.trim()) {
+  const handleAnalyze = async (urlOverride?: string, platformOverride?: Platform) => {
+    const urlToAnalyze = urlOverride ?? url;
+    const platformToAnalyze = platformOverride ?? platform;
+
+    if (!urlToAnalyze.trim()) {
       toast.error("Please enter a URL to analyze");
       return;
     }
 
+    setUrl(urlToAnalyze);
+    setPlatform(platformToAnalyze);
     setIsAnalyzing(true);
     try {
-      const response = await analysisAPI.analyzeLink({ url, type: platform });
+      const response = await analysisAPI.analyzeLink({
+        url: urlToAnalyze,
+        type: platformToAnalyze,
+      });
       setResult(response);
 
       if (response.from_cache) {
@@ -125,6 +146,19 @@ const AnalyzeLink: React.FC = () => {
                 <label className="block text-white/80 text-sm font-medium mb-2">
                   {platform.charAt(0).toUpperCase() + platform.slice(1)} URL
                 </label>
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {quickLinks.map((quickLink) => (
+                    <button
+                      key={quickLink.url}
+                      type="button"
+                      onClick={() => handleAnalyze(quickLink.url, quickLink.platform)}
+                      disabled={isAnalyzing}
+                      className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-sm text-white/80 transition hover:border-purple-400 hover:bg-purple-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {quickLink.label}
+                    </button>
+                  ))}
+                </div>
                 <div className="relative">
                   <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/40" />
                   <input
@@ -155,7 +189,7 @@ const AnalyzeLink: React.FC = () => {
               )}
 
               <AnimatedButton
-                onClick={handleAnalyze}
+                onClick={() => handleAnalyze()}
                 isLoading={isAnalyzing}
                 className="w-full"
               >

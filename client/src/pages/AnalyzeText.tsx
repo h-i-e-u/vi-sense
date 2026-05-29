@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { GlassCard } from '../components/GlassCard';
 import { SentimentBadge } from '../components/SentimentBadge';
@@ -9,20 +8,29 @@ import { analysisAPI, getErrorMessage } from '../services/api';
 import { SentimentResult } from '../types';
 import toast from 'react-hot-toast';
 
+const sampleTexts = [
+  'Sản phẩm rất tốt, đóng gói cẩn thận, mình sẽ mua lại lần sau.',
+  'Giao hàng chậm và sản phẩm không giống mô tả, khá thất vọng.',
+  'Dịch vụ ổn, giá hợp lý nhưng chất lượng chưa thật sự nổi bật.',
+];
+
 const AnalyzeText: React.FC = () => {
   const [text, setText] = useState('');
   const [result, setResult] = useState<SentimentResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const handleAnalyze = async () => {
-    if (!text.trim()) {
+  const handleAnalyze = async (textOverride?: string) => {
+    const textToAnalyze = textOverride ?? text;
+
+    if (!textToAnalyze.trim()) {
       toast.error('Please enter some text to analyze');
       return;
     }
 
+    setText(textToAnalyze);
     setIsAnalyzing(true);
     try {
-      const response = await analysisAPI.analyzeText({ text });
+      const response = await analysisAPI.analyzeText({ text: textToAnalyze });
       if (response.results && response.results.length > 0) {
         setResult(response.results[0]);
         toast.success('Analysis completed!');
@@ -67,6 +75,19 @@ const AnalyzeText: React.FC = () => {
                 <label className="block text-white/80 text-sm font-medium mb-2">
                   Enter Vietnamese Text
                 </label>
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {sampleTexts.map((sample) => (
+                    <button
+                      key={sample}
+                      type="button"
+                      onClick={() => handleAnalyze(sample)}
+                      disabled={isAnalyzing}
+                      className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-sm text-white/80 transition hover:border-purple-400 hover:bg-purple-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {sample}
+                    </button>
+                  ))}
+                </div>
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
@@ -80,7 +101,7 @@ const AnalyzeText: React.FC = () => {
               </div>
 
               <AnimatedButton
-                onClick={handleAnalyze}
+                onClick={() => handleAnalyze()}
                 isLoading={isAnalyzing}
                 className="w-full"
               >

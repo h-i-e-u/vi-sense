@@ -18,6 +18,7 @@ export interface AnalysisJob {
   status: "pending" | "processing" | "completed" | "failed";
   created_at: string;
   completed_at?: string;
+  source_url?: string | null;
   results?: SentimentResult[];
   metadata?: {
     total_comments?: number;

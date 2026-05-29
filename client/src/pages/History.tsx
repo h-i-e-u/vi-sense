@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { History as HistoryIcon, Calendar, Trash2, ChevronRight, RefreshCw } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { GlassCard } from '../components/GlassCard';
-import { SentimentBadge } from '../components/SentimentBadge';
 import { historyAPI, analysisAPI } from '../services/api';
 import { AnalysisJob } from '../types';
 
@@ -87,6 +86,10 @@ const History: React.FC = () => {
     }
   };
 
+  const getSourceUrl = (job: AnalysisJob) => {
+    return job.type === 'link' ? job.source_url || job.metadata?.source_url : undefined;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen p-6">
@@ -160,6 +163,17 @@ const History: React.FC = () => {
                             <h3 className="text-lg font-semibold text-white mb-1">
                               {getJobTypeLabel(job.type)}
                             </h3>
+                            {getSourceUrl(job) && (
+                              <a
+                                href={getSourceUrl(job)}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={getSourceUrl(job)}
+                                className="mb-3 block max-w-full truncate text-sm text-blue-300 hover:text-blue-200"
+                              >
+                                {getSourceUrl(job)}
+                              </a>
+                            )}
                             <div className="flex items-center space-x-4 text-white/60 text-sm mb-3">
                               <div className="flex items-center space-x-1">
                                 <Calendar className="h-4 w-4" />

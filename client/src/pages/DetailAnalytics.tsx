@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Calendar, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Sidebar } from "../components/Sidebar";
 import { GlassCard } from "../components/GlassCard";
 import { ChartCard } from "../components/ChartCard";
-import { SentimentBadge } from "../components/SentimentBadge";
 import { analyticsAPI, analysisAPI, historyAPI } from "../services/api";
 import { AnalyticsSummary, AnalysisJob } from "../types";
 import {
@@ -101,6 +100,10 @@ const DetailAnalytics: React.FC = () => {
     }
   };
 
+  const getSourceUrl = (job: AnalysisJob) => {
+    return job.type === "link" ? job.source_url || job.metadata?.source_url : undefined;
+  };
+
   const formatDateLabel = (date: string) => {
     const d = new Date(date);
     if (Number.isNaN(d.getTime())) return date;
@@ -156,6 +159,8 @@ const DetailAnalytics: React.FC = () => {
     );
   }
 
+  const sourceUrl = getSourceUrl(job);
+
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
@@ -192,6 +197,17 @@ const DetailAnalytics: React.FC = () => {
                   <p className="text-white/60">
                     Created on {new Date(job.created_at).toLocaleDateString()}
                   </p>
+                  {sourceUrl && (
+                    <a
+                      href={sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      title={sourceUrl}
+                      className="mt-2 block max-w-2xl truncate text-sm text-blue-300 hover:text-blue-200"
+                    >
+                      {sourceUrl}
+                    </a>
+                  )}
                 </div>
 
                 {(job.type === "link") &&
