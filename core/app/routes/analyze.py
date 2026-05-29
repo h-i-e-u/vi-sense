@@ -8,6 +8,7 @@ from ..schemas import (
 from ..utils.sentiment import sentiment_analyzer
 from ..routes.auth import get_current_user
 from core.crawlers.youtube_crawler import YouTubeCrawler
+from core.crawlers.tiki_crawler import TikiCrawler
 import uuid
 import os
 import re
@@ -177,6 +178,22 @@ async def analyze_link(
             comment_dates = []
             for comment in comments:
                 timestamp = comment.get('timestamp')
+                try:
+                    if timestamp:
+                        comment_dates.append(datetime.fromisoformat(timestamp.replace('Z', '+00:00')))
+                    else:
+                        comment_dates.append(None)
+                except Exception:
+                    comment_dates.append(None)
+        elif request.type == 'tiki':
+            crawler = TikiCrawler()
+            reviews = crawler.get_reviews(request.url, max_reviews=50)
+            if not reviews:
+                raise HTTPException(status_code=404, detail="No reviews found for the provided Tiki product")
+            texts = [review['text'] for review in reviews]
+            comment_dates = []
+            for review in reviews:
+                timestamp = review.get('timestamp')
                 try:
                     if timestamp:
                         comment_dates.append(datetime.fromisoformat(timestamp.replace('Z', '+00:00')))
