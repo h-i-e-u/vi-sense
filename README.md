@@ -91,18 +91,398 @@ docker-compose up --build
 
 ## API Documentation
 
+Base URL: `http://localhost:8000`
+
+API docs tu dong cua FastAPI: `http://localhost:8000/docs`
+
+Tat ca endpoint ben duoi, tru `/`, `/health`, `/auth/register`, `/auth/login`, can header:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+### Root & Health
+
+#### `GET /`
+
+Response:
+
+```json
+{
+  "message": "Welcome to Vi-Sense API"
+}
+```
+
+#### `GET /health`
+
+Response:
+
+```json
+{
+  "status": "healthy"
+}
+```
+
 ### Authentication
-- `POST /auth/register` - User registration
-- `POST /auth/login` - User login
+
+#### `POST /auth/register`
+
+Dang ky tai khoan moi.
+
+Request:
+
+```json
+{
+  "email": "user@example.com",
+  "username": "demo_user",
+  "password": "your_password"
+}
+```
+
+Response:
+
+```json
+{
+  "access_token": "jwt-token",
+  "token_type": "bearer",
+  "user": {
+    "id": "user-uuid",
+    "email": "user@example.com",
+    "username": "demo_user",
+    "created_at": "2026-05-29T12:00:00"
+  }
+}
+```
+
+#### `POST /auth/login`
+
+Dang nhap bang form URL encoded. Truong `username` la email.
+
+Request content type: `application/x-www-form-urlencoded`
+
+```text
+username=user@example.com&password=your_password
+```
+
+Response giong `/auth/register`.
 
 ### Analysis
-- `POST /analyze/text` - Analyze single text
-- `POST /analyze/link` - Analyze from URL
-- `POST /analyze/file` - Analyze uploaded file
 
-### History & Analytics
-- `GET /history` - Get analysis history
-- `GET /analytics/summary` - Get analytics data
+Response chung cua cac API analyze la `AnalysisJob`:
+
+```json
+{
+  "id": "job-uuid",
+  "user_id": "user-uuid",
+  "type": "text",
+  "status": "completed",
+  "created_at": "2026-05-29T12:00:00",
+  "completed_at": "2026-05-29T12:00:01",
+  "source_url": null,
+  "results": [
+    {
+      "label": "POSITIVE",
+      "confidence": 0.98,
+      "text": "San pham rat tot"
+    }
+  ],
+  "metadata": {
+    "total_comments": 1,
+    "positive_ratio": 1.0,
+    "neutral_ratio": 0.0,
+    "negative_ratio": 0.0
+  },
+  "from_cache": false
+}
+```
+
+`label` co the la `POSITIVE`, `NEUTRAL`, hoac `NEGATIVE`.
+
+#### `POST /analyze/text`
+
+Phan tich cam xuc cho mot doan text.
+
+Request:
+
+```json
+{
+  "text": "San pham rat tot, giao hang nhanh"
+}
+```
+
+Response: `AnalysisJob` voi `type = "text"` va `metadata.total_comments = 1`.
+
+#### `POST /analyze/link`
+
+Lay comment/review tu link va phan tich cam xuc. Ho tro `type`: `youtube`, `tiki`, `shopee`.
+
+Request:
+
+```json
+{
+  "url": "https://www.youtube.com/watch?v=VIDEO_ID",
+  "type": "youtube"
+}
+```
+
+Response:
+
+```json
+{
+  "id": "job-uuid",
+  "user_id": "user-uuid",
+  "type": "link",
+  "status": "completed",
+  "created_at": "2026-05-29T12:00:00",
+  "completed_at": "2026-05-29T12:00:05",
+  "source_url": "https://www.youtube.com/watch?v=VIDEO_ID",
+  "results": [
+    {
+      "label": "POSITIVE",
+      "confidence": 0.94,
+      "text": "Noi dung rat huu ich"
+    }
+  ],
+  "metadata": {
+    "total_comments": 50,
+    "positive_ratio": 0.7,
+    "neutral_ratio": 0.2,
+    "negative_ratio": 0.1,
+    "source_url": "https://www.youtube.com/watch?v=VIDEO_ID",
+    "platform": "youtube"
+  },
+  "from_cache": false
+}
+```
+
+Neu link da tung duoc phan tich thanh cong, API co the tra job cu voi `from_cache = true`.
+
+#### `POST /analyze/file`
+
+Upload file va phan tich cam xuc theo tung dong/ban ghi. Ho tro `.csv`, `.xlsx`, `.xls`, `.txt`.
+
+Request content type: `multipart/form-data`
+
+```text
+file=@reviews.csv
+```
+
+Response: `AnalysisJob` voi `type = "file"` va metadata co them thong tin file:
+
+```json
+{
+  "metadata": {
+    "total_comments": 120,
+    "positive_ratio": 0.6,
+    "neutral_ratio": 0.25,
+    "negative_ratio": 0.15,
+    "file_name": "reviews.csv",
+    "file_size": 4096
+  }
+}
+```
+
+#### `GET /analyze/check-existing/{job_id}`
+
+Kiem tra job co ton tai va da co ket qua sentiment hay chua.
+
+Response:
+
+```json
+{
+  "exists": true,
+  "has_results": true,
+  "job_type": "link",
+  "status": "completed",
+  "created_at": "2026-05-29T12:00:00",
+  "result_count": 50,
+  "metadata": {
+    "total_comments": 50,
+    "platform": "youtube"
+  }
+}
+```
+
+Neu khong tim thay:
+
+```json
+{
+  "exists": false,
+  "has_results": false
+}
+```
+
+#### `POST /analyze/refresh/{job_id}`
+
+Chay lai phan tich cho job link cu. Endpoint nay khong ho tro job `text` hoac `file`.
+
+Response: `AnalysisJob` moi, co `metadata.refreshed_from` tro ve job cu.
+
+### History
+
+#### `GET /history?skip=0&limit=50`
+
+Lay lich su phan tich cua user hien tai.
+
+Response:
+
+```json
+[
+  {
+    "id": "job-uuid",
+    "user_id": "user-uuid",
+    "type": "text",
+    "status": "completed",
+    "created_at": "2026-05-29T12:00:00",
+    "completed_at": "2026-05-29T12:00:01",
+    "source_url": null,
+    "results": [],
+    "metadata": {},
+    "from_cache": false
+  }
+]
+```
+
+#### `GET /history/{job_id}`
+
+Lay chi tiet mot job.
+
+Response: `AnalysisJob`.
+
+#### `DELETE /history/`
+
+Xoa toan bo lich su cua user hien tai.
+
+Response:
+
+```json
+{
+  "message": "All history deleted successfully"
+}
+```
+
+### Analytics
+
+#### `GET /analytics/summary`
+
+Tong quan analytics cua user hien tai.
+
+Response:
+
+```json
+{
+  "total_analyses": 10,
+  "text_analyses": 4,
+  "file_analyses": 2,
+  "link_analyses": 4,
+  "sentiment_distribution": {
+    "positive": 80,
+    "neutral": 30,
+    "negative": 15
+  },
+  "daily_analysis_counts": [
+    {
+      "date": "2026-05-29",
+      "count": 3
+    }
+  ],
+  "top_keywords": [
+    {
+      "word": "tot",
+      "count": 12
+    }
+  ]
+}
+```
+
+#### `GET /analytics/job/{job_id}`
+
+Analytics chi tiet cho mot job.
+
+Response:
+
+```json
+{
+  "total_analyses": 1,
+  "text_analyses": 0,
+  "file_analyses": 0,
+  "link_analyses": 1,
+  "sentiment_distribution": {
+    "positive": 35,
+    "neutral": 10,
+    "negative": 5
+  },
+  "trend_data": [
+    {
+      "date": "2026-05-29",
+      "positive": 5,
+      "neutral": 1,
+      "negative": 0
+    }
+  ],
+  "top_keywords": [
+    {
+      "word": "hay",
+      "count": 8
+    }
+  ],
+  "top_positive_comments": [
+    {
+      "id": "result-uuid",
+      "job_id": "job-uuid",
+      "text": "Rat hai long",
+      "sentiment": {
+        "label": "POSITIVE",
+        "confidence": 0.99,
+        "text": "Rat hai long"
+      },
+      "source_date": "2026-05-29T12:00:00",
+      "created_at": "2026-05-29T12:00:00"
+    }
+  ],
+  "top_negative_comments": []
+}
+```
+
+### Sentences
+
+#### `GET /sentences/?page=1&limit=20&search=tot&job_type=text&label=POSITIVE`
+
+Lay danh sach cac cau/comment da duoc xu ly, co phan trang va filter.
+
+Query params:
+
+- `page`: so trang, mac dinh `1`
+- `limit`: so item moi trang, tu `1` den `100`, mac dinh `20`
+- `search`: tim trong noi dung cau
+- `job_type`: `text`, `link`, hoac `file`
+- `label`: `POSITIVE`, `NEUTRAL`, hoac `NEGATIVE`
+
+Response:
+
+```json
+{
+  "total": 42,
+  "page": 1,
+  "limit": 20,
+  "total_pages": 3,
+  "items": [
+    {
+      "id": "result-uuid",
+      "job_id": "job-uuid",
+      "comment_id": "comment-uuid",
+      "text": "San pham rat tot",
+      "label": "POSITIVE",
+      "confidence": 0.98,
+      "created_at": "2026-05-29T12:00:00",
+      "job": {
+        "id": "job-uuid",
+        "type": "text"
+      }
+    }
+  ]
+}
+```
 
 ## Development
 
