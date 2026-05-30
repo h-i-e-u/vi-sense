@@ -31,6 +31,7 @@ start "Vi-Sense Frontend" cmd /k ""cd /d "%CLIENT_DIR%" && npm run dev""
 echo Vi-Sense is running!
 echo Backend: http://localhost:8000
 echo Frontend: http://localhost:5173
+echo API Base: http://localhost:8000/api
 echo API Docs: http://localhost:8000/docs
 
 pause

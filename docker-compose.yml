@@ -15,17 +15,4 @@ services:
     depends_on:
       - db
 
-  frontend:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    ports:
-      - "5173:5173"
-    depends_on:
-      - backend
-
-  db:
-    image: sqlite3:latest
-    volumes:
-      - ./data:/data
-    command: ["sqlite3", "/data/vi_sense.db"]
+ 

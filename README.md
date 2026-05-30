@@ -80,7 +80,7 @@ npm run dev
 
 3. **Access the app:**
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
+- Backend API: http://localhost:8000/api
 - API Docs: http://localhost:8000/docs
 
 ### Docker Deployment
@@ -91,11 +91,11 @@ docker-compose up --build
 
 ## API Documentation
 
-Base URL: `http://localhost:8000`
+Base URL: `http://localhost:8000/api`
 
 API docs tu dong cua FastAPI: `http://localhost:8000/docs`
 
-Tat ca endpoint ben duoi, tru `/`, `/health`, `/auth/register`, `/auth/login`, can header:
+Tat ca endpoint ben duoi, tru `/api`, `/api/health`, `/api/auth/register`, `/api/auth/login`, can header:
 
 ```http
 Authorization: Bearer <access_token>
@@ -103,7 +103,7 @@ Authorization: Bearer <access_token>
 
 ### Root & Health
 
-#### `GET /`
+#### `GET /api`
 
 Response:
 
@@ -113,7 +113,7 @@ Response:
 }
 ```
 
-#### `GET /health`
+#### `GET /api/health`
 
 Response:
 
@@ -125,7 +125,7 @@ Response:
 
 ### Authentication
 
-#### `POST /auth/register`
+#### `POST /api/auth/register`
 
 Dang ky tai khoan moi.
 
@@ -154,7 +154,7 @@ Response:
 }
 ```
 
-#### `POST /auth/login`
+#### `POST /api/auth/login`
 
 Dang nhap bang form URL encoded. Truong `username` la email.
 
@@ -164,7 +164,7 @@ Request content type: `application/x-www-form-urlencoded`
 username=user@example.com&password=your_password
 ```
 
-Response giong `/auth/register`.
+Response giong `/api/auth/register`.
 
 ### Analysis
 
@@ -198,7 +198,7 @@ Response chung cua cac API analyze la `AnalysisJob`:
 
 `label` co the la `POSITIVE`, `NEUTRAL`, hoac `NEGATIVE`.
 
-#### `POST /analyze/text`
+#### `POST /api/analyze/text`
 
 Phan tich cam xuc cho mot doan text.
 
@@ -212,7 +212,7 @@ Request:
 
 Response: `AnalysisJob` voi `type = "text"` va `metadata.total_comments = 1`.
 
-#### `POST /analyze/link`
+#### `POST /api/analyze/link`
 
 Lay comment/review tu link va phan tich cam xuc. Ho tro `type`: `youtube`, `tiki`, `shopee`.
 
@@ -257,7 +257,7 @@ Response:
 
 Neu link da tung duoc phan tich thanh cong, API co the tra job cu voi `from_cache = true`.
 
-#### `POST /analyze/file`
+#### `POST /api/analyze/file`
 
 Upload file va phan tich cam xuc theo tung dong/ban ghi. Ho tro `.csv`, `.xlsx`, `.xls`, `.txt`.
 
@@ -282,7 +282,7 @@ Response: `AnalysisJob` voi `type = "file"` va metadata co them thong tin file:
 }
 ```
 
-#### `GET /analyze/check-existing/{job_id}`
+#### `GET /api/analyze/check-existing/{job_id}`
 
 Kiem tra job co ton tai va da co ket qua sentiment hay chua.
 
@@ -312,7 +312,7 @@ Neu khong tim thay:
 }
 ```
 
-#### `POST /analyze/refresh/{job_id}`
+#### `POST /api/analyze/refresh/{job_id}`
 
 Chay lai phan tich cho job link cu. Endpoint nay khong ho tro job `text` hoac `file`.
 
@@ -320,7 +320,7 @@ Response: `AnalysisJob` moi, co `metadata.refreshed_from` tro ve job cu.
 
 ### History
 
-#### `GET /history?skip=0&limit=50`
+#### `GET /api/history?skip=0&limit=50`
 
 Lay lich su phan tich cua user hien tai.
 
@@ -343,13 +343,13 @@ Response:
 ]
 ```
 
-#### `GET /history/{job_id}`
+#### `GET /api/history/{job_id}`
 
 Lay chi tiet mot job.
 
 Response: `AnalysisJob`.
 
-#### `DELETE /history/`
+#### `DELETE /api/history/`
 
 Xoa toan bo lich su cua user hien tai.
 
@@ -363,7 +363,7 @@ Response:
 
 ### Analytics
 
-#### `GET /analytics/summary`
+#### `GET /api/analytics/summary`
 
 Tong quan analytics cua user hien tai.
 
@@ -395,7 +395,7 @@ Response:
 }
 ```
 
-#### `GET /analytics/job/{job_id}`
+#### `GET /api/analytics/job/{job_id}`
 
 Analytics chi tiet cho mot job.
 
@@ -446,7 +446,7 @@ Response:
 
 ### Sentences
 
-#### `GET /sentences/?page=1&limit=20&search=tot&job_type=text&label=POSITIVE`
+#### `GET /api/sentences/?page=1&limit=20&search=tot&job_type=text&label=POSITIVE`
 
 Lay danh sach cac cau/comment da duoc xu ly, co phan trang va filter.
 

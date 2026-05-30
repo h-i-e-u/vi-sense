@@ -148,7 +148,7 @@ const History: React.FC = () => {
               </GlassCard>
             ) : (
               <div className="space-y-4">
-                {jobs.map((job, index) => (
+                {jobs?.map((job, index) => (
                   <motion.div
                     key={job.id}
                     initial={{ opacity: 0, y: 20 }}

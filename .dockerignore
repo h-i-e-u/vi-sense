@@ -1,0 +1,23 @@
+# Loại trừ các file rác của Python trong thư mục core
+core/**/__pycache__/
+core/**/*.pyc
+core/**/*.pyo
+core/**/*.pyd
+
+# Loại trừ môi trường ảo nếu lỡ tạo bên trong core
+core/.venv/
+core/env/
+core/venv/
+
+# Loại trừ file cấu hình bí mật và file DB chạy thử ở máy local
+core/.env
+core/*.db
+core/*.sqlite3
+
+# Loại trừ các file log hoặc file cấu hình IDE
+core/.vscode/
+core/.idea/
+core/*.log
+
+core/uploads/
+core/tests/

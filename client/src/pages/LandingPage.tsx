@@ -30,7 +30,7 @@ const LandingPage: React.FC = () => {
             className="text-xl text-white/80 mb-8 max-w-2xl mx-auto"
           >
             Advanced Vietnamese sentiment analysis powered by AI. Analyze
-            YouTube comments, Shopee reviews, and text in real-time.
+            YouTube comments, <s>Shopee reviews</s>, and text in real-time.
           </motion.p>
 
           <motion.div
