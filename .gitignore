@@ -17,6 +17,8 @@ share/python-wheels/
 /
 */best_phobert_model
 best_phobert_model/
+*/absa_model
+absa_model/
 # Virtual environments and env files
 venv/
 */venv

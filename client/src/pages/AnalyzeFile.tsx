@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Download, ChevronRight } from "lucide-react";
+import { FileText, Download, ChevronRight, Tags } from "lucide-react";
 import { Sidebar } from "../components/Sidebar";
 import { GlassCard } from "../components/GlassCard";
 import { FileUploader } from "../components/FileUploader";
@@ -10,6 +10,16 @@ import { analysisAPI, getErrorMessage } from "../services/api";
 import { AnalysisJob } from "../types";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  LabelList,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 const AnalyzeFile: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -39,12 +49,46 @@ const AnalyzeFile: React.FC = () => {
     }
   };
 
+  const absaChartData = result?.metadata?.absa_summary
+    ? Object.entries(result.metadata.absa_summary.aspect_counts)
+        .map(([aspect, count]) => ({
+          aspect,
+          count,
+          ...(result.metadata?.absa_summary?.aspect_sentiments[aspect] ?? {}),
+        }))
+        .sort((a, b) => b.count - a.count)
+    : [];
+
+  const absaSentiments = result?.metadata?.absa_summary
+    ? Object.keys(result.metadata.absa_summary.sentiment_counts)
+    : [];
+
+  const absaSentimentColors: Record<string, string> = {
+    Positive: "#22C55E",
+    POSITIVE: "#22C55E",
+    Negative: "#EF4444",
+    NEGATIVE: "#EF4444",
+    Neutral: "#F59E0B",
+    NEUTRAL: "#F59E0B",
+  };
+
   const exportResults = () => {
     if (!result?.results) return;
 
+    const absaByIndex = new Map(
+      result.metadata?.absa_results?.map((item) => [item.index, item.aspects]) ??
+        [],
+    );
     const csvContent = [
-      ["Text", "Sentiment", "Confidence"],
-      ...result.results.map((r) => [r.text, r.label, r.confidence.toString()]),
+      ["Text", "Sentiment", "Confidence", "ABSA"],
+      ...result.results.map((r, index) => [
+        r.text,
+        r.label,
+        r.confidence.toString(),
+        (absaByIndex.get(index) ?? [])
+          .map((item) => `${item.aspect}:${item.sentiment}`)
+          .join("; "),
+      ]),
     ]
       .map((row) => row.map((cell) => `"${cell}"`).join(","))
       .join("\n");
@@ -173,6 +217,117 @@ const AnalyzeFile: React.FC = () => {
                       <div className="text-white/60 text-sm">Negative</div>
                     </div>
                   </div>
+
+                  {result.metadata?.absa_enabled && result.metadata.absa_summary && (
+                    <div className="mb-6 rounded-lg bg-white/5 p-4">
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-2">
+                          <Tags className="h-5 w-5 text-cyan-300" />
+                          <h4 className="text-lg font-medium text-white">
+                            ABSA Summary
+                          </h4>
+                        </div>
+                        <div className="text-sm text-white/60">
+                          {
+                            result.metadata.absa_summary
+                              .total_aspect_mentions
+                          }{" "}
+                          mentions
+                        </div>
+                      </div>
+                      <div className="mb-3 flex flex-wrap gap-3">
+                        {absaSentiments.map((sentiment) => (
+                          <div
+                            key={sentiment}
+                            className="flex items-center gap-2 text-xs text-white/70"
+                          >
+                            <span
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{
+                                backgroundColor:
+                                  absaSentimentColors[sentiment] ?? "#38BDF8",
+                              }}
+                            />
+                            {sentiment}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="h-72">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart
+                            data={absaChartData}
+                            layout="vertical"
+                            margin={{
+                              top: 8,
+                              right: 32,
+                              bottom: 8,
+                              left: 16,
+                            }}
+                          >
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              stroke="rgba(255,255,255,0.12)"
+                              horizontal={false}
+                            />
+                            <XAxis
+                              type="number"
+                              allowDecimals={false}
+                              stroke="#9CA3AF"
+                              fontSize={12}
+                            />
+                            <YAxis
+                              type="category"
+                              dataKey="aspect"
+                              width={96}
+                              stroke="#D1D5DB"
+                              fontSize={12}
+                            />
+                            <Tooltip
+                              cursor={{ fill: "rgba(255,255,255,0.06)" }}
+                              contentStyle={{
+                                backgroundColor: "rgba(12, 18, 32, 0.96)",
+                                border: "1px solid rgba(255,255,255,0.16)",
+                                borderRadius: "8px",
+                                color: "#FFFFFF",
+                              }}
+                              formatter={(value, name) => [value, name]}
+                            />
+                            {absaSentiments.map((sentiment, index) => (
+                              <Bar
+                                key={sentiment}
+                                dataKey={sentiment}
+                                stackId="sentiment"
+                                fill={
+                                  absaSentimentColors[sentiment] ?? "#38BDF8"
+                                }
+                                radius={
+                                  index === absaSentiments.length - 1
+                                    ? [0, 6, 6, 0]
+                                    : [0, 0, 0, 0]
+                                }
+                                barSize={18}
+                              >
+                                {index === absaSentiments.length - 1 && (
+                                  <LabelList
+                                    dataKey="count"
+                                    position="right"
+                                    fill="#E5E7EB"
+                                    fontSize={12}
+                                  />
+                                )}
+                              </Bar>
+                            ))}
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+
+                  {result.metadata?.absa_error && (
+                    <div className="mb-6 rounded-lg border border-yellow-400/30 bg-yellow-400/10 p-4 text-sm text-yellow-100">
+                      ABSA model chưa sẵn sàng: {result.metadata.absa_error}
+                    </div>
+                  )}
 
                   {/* Sample Results */}
                   <div className="space-y-4">

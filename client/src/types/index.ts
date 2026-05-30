@@ -11,6 +11,28 @@ export interface SentimentResult {
   text: string;
 }
 
+export interface ABSAAspectResult {
+  aspect: string;
+  sentiment: string;
+  context: string;
+}
+
+export interface ABSACommentResult {
+  index: number;
+  aspects: ABSAAspectResult[];
+}
+
+export interface ABSASummary {
+  total_aspect_mentions: number;
+  aspect_counts: Record<string, number>;
+  sentiment_counts: Record<string, number>;
+  aspect_sentiments: Record<string, Record<string, number>>;
+  top_aspects: Array<{
+    aspect: string;
+    count: number;
+  }>;
+}
+
 export interface AnalysisJob {
   id: string;
   user_id: string;
@@ -28,6 +50,12 @@ export interface AnalysisJob {
     keywords?: string[];
     source_url?: string;
     platform?: string;
+    file_name?: string;
+    file_size?: number;
+    absa_enabled?: boolean;
+    absa_error?: string | null;
+    absa_results?: ABSACommentResult[];
+    absa_summary?: ABSASummary | null;
   };
   from_cache?: boolean;// flag from cahe
 }

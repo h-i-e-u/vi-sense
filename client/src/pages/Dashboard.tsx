@@ -18,13 +18,12 @@ import {
   CartesianGrid,
   Tooltip,
   Bar,
-  LabelList,
   BarChart,
 } from "recharts";
 
 const Dashboard: React.FC = () => {
   const [analytics, setAnalytics] = useState<UserAnalyticsSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const dailyData = analytics?.daily_analysis_counts || [];
 
   useEffect(() => {

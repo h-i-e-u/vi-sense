@@ -6,6 +6,7 @@ from ..schemas import (
     SentimentResult, Comment
 )
 from ..utils.sentiment import sentiment_analyzer
+from ..utils.absa import absa_analyzer
 from ..routes.auth import get_current_user
 from core.crawlers.youtube_crawler import YouTubeCrawler
 from core.crawlers.tiki_crawler import TikiCrawler
@@ -312,6 +313,15 @@ async def analyze_file(
         results = sentiment_analyzer.analyze_batch(texts)
         save_sentiment_results(db, job.id, results, texts, comment_dates=comment_dates)
 
+        absa_results = []
+        absa_summary = None
+        absa_error = None
+        try:
+            absa_results = absa_analyzer.analyze_batch(texts)
+            absa_summary = absa_analyzer.summarize(absa_results)
+        except Exception as e:
+            absa_error = str(e)
+
         # Calculate ratios
         positive_count = sum(1 for r in results if r['label'] == 'POSITIVE')
         neutral_count = sum(1 for r in results if r['label'] == 'NEUTRAL')
@@ -324,7 +334,11 @@ async def analyze_file(
             "neutral_ratio": neutral_count / total,
             "negative_ratio": negative_count / total,
             "file_name": file.filename,
-            "file_size": len(content)
+            "file_size": len(content),
+            "absa_enabled": absa_error is None,
+            "absa_error": absa_error,
+            "absa_results": absa_results,
+            "absa_summary": absa_summary,
         }
         update_job_status(db, job.id, "completed", metadata)
 

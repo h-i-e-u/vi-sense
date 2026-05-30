@@ -4,7 +4,6 @@ import { TrendingUp, Meh, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Sidebar } from "../components/Sidebar";
 import { ChartCard } from "../components/ChartCard";
 import { GlassCard } from "../components/GlassCard";
-import { SentimentBadge } from "../components/SentimentBadge";
 import { analyticsAPI } from "../services/api";
 import { UserAnalyticsSummary } from "../types";
 import {
