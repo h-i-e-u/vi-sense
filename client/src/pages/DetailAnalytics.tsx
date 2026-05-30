@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw, Tags } from "lucide-react";
 import { Sidebar } from "../components/Sidebar";
 import { GlassCard } from "../components/GlassCard";
 import { ChartCard } from "../components/ChartCard";
 import { analyticsAPI, analysisAPI, historyAPI } from "../services/api";
 import { AnalyticsSummary, AnalysisJob } from "../types";
 import {
+  Bar,
+  BarChart,
   CartesianGrid,
+  LabelList,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -160,6 +163,26 @@ const DetailAnalytics: React.FC = () => {
   }
 
   const sourceUrl = getSourceUrl(job);
+  const absaChartData = job.metadata?.absa_summary
+    ? Object.entries(job.metadata.absa_summary.aspect_counts)
+        .map(([aspect, count]) => ({
+          aspect,
+          count,
+          ...(job.metadata?.absa_summary?.aspect_sentiments[aspect] ?? {}),
+        }))
+        .sort((a, b) => b.count - a.count)
+    : [];
+  const absaSentiments = job.metadata?.absa_summary
+    ? Object.keys(job.metadata.absa_summary.sentiment_counts)
+    : [];
+  const absaSentimentColors: Record<string, string> = {
+    Negative: "#EF4444",
+    NEGATIVE: "#EF4444",
+    Positive: "#22C55E",
+    POSITIVE: "#22C55E",
+    Neutral: "#F59E0B",
+    NEUTRAL: "#F59E0B",
+  };
 
   return (
     <div className="min-h-screen p-6">
@@ -353,6 +376,119 @@ const DetailAnalytics: React.FC = () => {
               </GlassCard>
             </motion.div>
 
+            {job.metadata?.absa_enabled && job.metadata.absa_summary && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+              >
+                <GlassCard className="p-6">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-2">
+                      <Tags className="h-5 w-5 text-cyan-300" />
+                      <h2 className="text-xl font-bold text-white">
+                        ABSA Summary
+                      </h2>
+                    </div>
+                    <div className="text-sm text-white/60">
+                      {job.metadata.absa_summary.total_aspect_mentions} mentions
+                    </div>
+                  </div>
+                  <div className="mb-3 flex flex-wrap gap-3">
+                    {absaSentiments.map((sentiment) => (
+                      <div
+                        key={sentiment}
+                        className="flex items-center gap-2 text-xs text-white/70"
+                      >
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{
+                            backgroundColor:
+                              absaSentimentColors[sentiment] ?? "#38BDF8",
+                          }}
+                        />
+                        {sentiment}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={absaChartData}
+                        layout="vertical"
+                        margin={{
+                          top: 8,
+                          right: 32,
+                          bottom: 8,
+                          left: 16,
+                        }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="rgba(255,255,255,0.12)"
+                          horizontal={false}
+                        />
+                        <XAxis
+                          type="number"
+                          allowDecimals={false}
+                          stroke="#9CA3AF"
+                          fontSize={12}
+                        />
+                        <YAxis
+                          type="category"
+                          dataKey="aspect"
+                          width={96}
+                          stroke="#D1D5DB"
+                          fontSize={12}
+                        />
+                        <Tooltip
+                          cursor={{ fill: "rgba(255,255,255,0.06)" }}
+                          contentStyle={{
+                            backgroundColor: "rgba(12, 18, 32, 0.96)",
+                            border: "1px solid rgba(255,255,255,0.16)",
+                            borderRadius: "8px",
+                            color: "#FFFFFF",
+                          }}
+                          formatter={(value, name) => [value, name]}
+                        />
+                        {absaSentiments.map((sentiment, index) => (
+                          <Bar
+                            key={sentiment}
+                            dataKey={sentiment}
+                            stackId="sentiment"
+                            fill={absaSentimentColors[sentiment] ?? "#38BDF8"}
+                            radius={
+                              index === absaSentiments.length - 1
+                                ? [0, 6, 6, 0]
+                                : [0, 0, 0, 0]
+                            }
+                            barSize={18}
+                          >
+                            {index === absaSentiments.length - 1 && (
+                              <LabelList
+                                dataKey="count"
+                                position="right"
+                                fill="#E5E7EB"
+                                fontSize={12}
+                              />
+                            )}
+                          </Bar>
+                        ))}
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </GlassCard>
+              </motion.div>
+            )}
+
+            {job.metadata?.absa_error && (
+              <GlassCard className="p-4">
+                <p className="text-sm text-yellow-100">
+                  ABSA model chưa sẵn sàng: {job.metadata.absa_error}
+                </p>
+              </GlassCard>
+            )}
+
             {/* Trend Data for Link/File */}
             {(job.type === "link" || job.type === "file") &&
               analytics.trend_data.length > 0 && (
@@ -361,7 +497,7 @@ const DetailAnalytics: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
                 >
-                  <ChartCard title="Sentiment Trend (Last 7 Days)">
+                  <ChartCard title="Sentiment Trend (Last 30 Days)">
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart data={analytics.trend_data}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />

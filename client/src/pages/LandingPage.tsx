@@ -200,7 +200,7 @@ const LandingPage: React.FC = () => {
           <div className="flex items-center space-x-4">
             {/* GitHub SVG */}
             <a
-              href="https://github.com"
+              href="https://github.com/h-i-e-u/vi-sense"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-white/80 transition-colors"

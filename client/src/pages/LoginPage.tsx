@@ -130,6 +130,9 @@ const LoginPage: React.FC = () => {
               Home
             </Link>
           </div>
+          <div className="mt-4 text-center">
+            <p className="text-white">test@gmail.com / 1234</p>
+          </div>
         </GlassCard>
       </motion.div>
     </div>
