@@ -1,3 +1,4 @@
+# dont use this
 @echo off
 setlocal
 
