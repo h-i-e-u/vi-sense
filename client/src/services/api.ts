@@ -126,7 +126,7 @@ export const analysisAPI = {
 
 export const historyAPI = {
   getHistory: async (): Promise<AnalysisJob[]> => {
-    const response = await api.get('/history');
+    const response = await api.get('/history/');
     return response.data;
   },
 
@@ -155,7 +155,7 @@ export const analyticsAPI = {
 
 export const sentencesAPI = {
   getProcessedSentences: async (params: SentenceQueryParams): Promise<PaginatedSentencesResponse> => {
-    const response = await api.get('/sentences', { params });
+    const response = await api.get('/sentences/', { params });
     return response.data;
   },
 };
