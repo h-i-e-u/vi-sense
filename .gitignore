@@ -49,3 +49,6 @@ Thumbs.db
 # Uploads / generated content
 uploads/
 */uploads
+
+*/ml
+ml/
